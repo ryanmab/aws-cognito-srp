@@ -3,8 +3,8 @@ name = "aws-cognito-srp"
 version = "0.0.1"
 authors = ["Ryan Maber <ryan@ryanmaber.com>"]
 license = "MIT"
-description = "A Rust implementation of the SRP (Secure Remote Password) protocol for AWS Cognito User and Device authentication."
-keywords = ["aws", "cognito", "srp", "authentication"]
+description = "A Rust implementation of the Secure Remote Password (SRP) protocol for AWS Cognito."
+keywords = ["aws", "cognito", "srp", "authentication", "device"]
 categories = ["cryptography", "authentication"]
 edition = "2021"
 rust-version = "1.65.0"
@@ -37,3 +37,10 @@ aws-sdk-cognitoidentityprovider = "1.62.0"
 dotenvy = "0.15.6"
 dotenvy_macro = "0.15.1"
 tokio = { version = "1.29.1", features = ["test-util", "macros", "tokio-macros"] }
+
+
+[package.metadata.release]
+pre-release-replacements = [
+    {file="README.md", search="aws-cognito-srp = \"[a-z0-9\\.-]+\"", replace="aws-cognito-srp = \"{{version}}\""} ,
+    {file="src/lib.rs", search="aws-cognito-srp = \"[a-z0-9\\.-]+\"", replace="aws-cognito-srp = \"{{version}}\""} ,
+]

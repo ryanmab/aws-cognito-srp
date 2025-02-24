@@ -8,7 +8,7 @@ use crate::client::helper::{
     compute_k, compute_pub_a, compute_pub_b, compute_s, compute_u, compute_x,
     generate_key_derive_data, get_timestamp, left_pad, left_pad_to_even_length,
 };
-use crate::client::{AuthParameters, HmacSha256, VerificationParameters};
+use crate::client::{private, AuthParameters, HmacSha256, VerificationParameters};
 use crate::{Credentials, SrpClient, SrpError};
 
 /// A **user** stored in the AWS Cognito user pool.
@@ -23,10 +23,11 @@ pub struct User {
     /// The format enforced by AWS Cognito is: `<region>_<pool id>`.
     ///
     /// For example: `us-east-1_SqmNeowUdp`.
-    pub pool_id: String,
-    pub username: String,
-    pub password: String,
+    pool_id: String,
+    username: String,
+    password: String,
 }
+impl private::Sealed for User {}
 impl Credentials for User {}
 
 impl User {
@@ -211,11 +212,7 @@ mod tests {
     #[test]
     fn test_auth_parameters_generates_successfully() {
         let client = SrpClient::<User, MockRng>::new(
-            User {
-                pool_id: "us-west-2_abc".to_string(),
-                username: "test".to_string(),
-                password: "password".to_string(),
-            },
+            User::new("us-west-2_abc", "test", "password"),
             "client_id",
             None,
         );
@@ -234,11 +231,7 @@ mod tests {
     #[test]
     fn test_verify_responds_predictably() {
         let client = SrpClient::<User, MockRng>::new(
-            User {
-                pool_id: "us-west-2_abc".to_string(),
-                username: "test".to_string(),
-                password: "password".to_string(),
-            },
+            User::new("us-west-2_abc", "test", "password"),
             "client_id",
             None,
         );
@@ -258,11 +251,7 @@ mod tests {
     #[test]
     fn test_verify_handles_odd_length_values() {
         let client = SrpClient::<User, MockRng>::new(
-            User {
-                pool_id: "us-west-2_abc".to_string(),
-                username: "test".to_string(),
-                password: "password".to_string(),
-            },
+            User::new("us-west-2_abc", "test", "password"),
             "client_id",
             None,
         );
