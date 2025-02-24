@@ -10,12 +10,12 @@ use crate::client::helper::{
     generate_key_derive_data, generate_password, generate_salt, get_timestamp, left_pad,
     left_pad_to_even_length,
 };
+use crate::client::private;
 use crate::client::{
     AuthParameters, HmacSha256, PasswordVerifierParameters, VerificationParameters,
 };
 use crate::constant::{G, N};
 use crate::{Credentials, SrpClient, SrpError};
-use crate::client::private;
 
 /// A **device** which is tracked against a user in the AWS Cognito user pool.
 ///
@@ -383,11 +383,7 @@ mod tests {
     #[test]
     fn test_password_verifier_responds_predictably() {
         let client = SrpClient::<_, MockRng>::new(
-            UntrackedDevice::new(
-                "us-west-2_abc",
-                "mock-device-group-key",
-                "mock-device-key",
-            ),
+            UntrackedDevice::new("us-west-2_abc", "mock-device-group-key", "mock-device-key"),
             "client_id",
             None,
         );
