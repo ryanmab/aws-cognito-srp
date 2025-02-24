@@ -253,8 +253,8 @@ jobs:
   teardown:
     name: Teardown Environment
     runs-on: ubuntu-latest
-    if: always()
-    needs: [ test, coverage ]
+    needs: [ setup, test, coverage ]
+    if: always() && needs.setup.result != 'skipped'
     steps:
       - uses: actions/checkout@v4
 
@@ -302,4 +302,4 @@ jobs:
         run: cargo install cargo-release
 
       - name: Publish version
-        run: cargo release --version ${GITHUB_REF#refs/tags/} --execute
+        run: cargo release --version ${GITHUB_REF#refs/tags/} -vv --no-tag --no-push --execute
