@@ -302,4 +302,4 @@ jobs:
         run: cargo install cargo-release
 
       - name: Publish version
-        run: cargo release ${GITHUB_REF#refs/tags/v} -vv --no-tag --no-push --execute
+        run: cargo release ${GITHUB_REF#refs/tags/v} -vv --no-tag --no-push --allow-branch HEAD --execute
