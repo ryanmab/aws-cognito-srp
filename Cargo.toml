@@ -42,5 +42,5 @@ tokio = { version = "1.29.1", features = ["test-util", "macros", "tokio-macros"]
 [package.metadata.release]
 pre-release-replacements = [
     {file="README.md", search="aws-cognito-srp = \"[a-z0-9\\.-]+\"", replace="aws-cognito-srp = \"{{version}}\""} ,
-    {file="lib.rs", search="aws-cognito-srp = \"[a-z0-9\\.-]+\"", replace="aws-cognito-srp = \"{{version}}\""} ,
+    {file="src/lib.rs", search="aws-cognito-srp = \"[a-z0-9\\.-]+\"", replace="aws-cognito-srp = \"{{version}}\""} ,
 ]
