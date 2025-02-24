@@ -253,8 +253,8 @@ jobs:
   teardown:
     name: Teardown Environment
     runs-on: ubuntu-latest
-    if: always()
-    needs: [ test, coverage ]
+    needs: [ setup, test, coverage ]
+    if: always() && needs.setup.result != 'skipped'
     steps:
       - uses: actions/checkout@v4
 
