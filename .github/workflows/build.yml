@@ -29,9 +29,6 @@ jobs:
       - name: Install Cargo Rdme
         run: cargo install cargo-rdme
 
-      - name: Install Cargo Release
-        run: cargo install cargo-release
-
       - name: cargo fmt --check
         run: cargo fmt --check
 
@@ -41,10 +38,6 @@ jobs:
       - name: cargo-semver-checks
         uses: obi1kenobi/cargo-semver-checks-action@v2
         continue-on-error: true
-
-      - name: Dry run publish
-        # This always runs in dry-run mode unless `--execute` is provided
-        run: cargo release --version ${{ github.ref_name }}
 
   clippy:
     runs-on: ubuntu-latest
@@ -291,7 +284,7 @@ jobs:
             -var="aws_region=${{ env.region }}"
 
   publish:
-    name: Publish crate
+    name: Publish Crate
     needs: [ test, coverage ]
     if: ${{ startsWith(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-latest
