@@ -2,6 +2,7 @@ on:
   pull_request:
   push:
     branches: [ main ]
+    tags: [ 'v*' ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -28,6 +29,9 @@ jobs:
       - name: Install Cargo Rdme
         run: cargo install cargo-rdme
 
+      - name: Install Cargo Release
+        run: cargo install cargo-release
+
       - name: cargo fmt --check
         run: cargo fmt --check
 
@@ -37,6 +41,10 @@ jobs:
       - name: cargo-semver-checks
         uses: obi1kenobi/cargo-semver-checks-action@v2
         continue-on-error: true
+
+      - name: Dry run publish
+        # This always runs in dry-run mode unless `--execute` is provided
+        run: cargo release --version ${{ github.ref_name }}
 
   clippy:
     runs-on: ubuntu-latest
@@ -281,3 +289,24 @@ jobs:
             -var="integration_test_user_email=${{ secrets.INTEGRATION_TEST_USER_EMAIL }}" \
             -var="integration_test_user_password=${{ secrets.INTEGRATION_TEST_USER_PASSWORD }}" \
             -var="aws_region=${{ env.region }}"
+
+  publish:
+    name: Publish crate
+    needs: [ test, coverage ]
+    if: ${{ startsWith(github.ref, 'refs/tags/') }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Login to crates.io
+        run: cargo login ${{ secrets.CRATES_IO_API_TOKEN }}
+
+      - name: Install cargo-release
+        run: cargo install cargo-release
+
+      - name: Publish version
+        run: cargo release --version ${GITHUB_REF#refs/tags/} --execute
