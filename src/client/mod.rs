@@ -16,7 +16,11 @@ mod user;
 
 type HmacSha256 = Hmac<Sha256>;
 
-pub trait Credentials {}
+mod private {
+    pub trait Sealed {}
+}
+
+pub trait Credentials: private::Sealed {}
 
 /// The parameters required to initiate an authentication flow with AWS Cognito, when using the
 /// `USER_SRP_AUTH` flow type.
@@ -88,6 +92,7 @@ pub struct PasswordVerifierParameters {
 /// 1. [User] - For authenticating via SRP with a user.
 /// 2. [TrackedDevice] - For authenticating via SRP with a remembered device.
 /// 3. [UntrackedDevice] - For generating a password verifier for a new device during confirmation.
+#[derive(Debug)]
 pub struct SrpClient<C: Credentials, R: RngCore> {
     a: Vec<u8>,
     credentials: C,

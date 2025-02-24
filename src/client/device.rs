@@ -15,6 +15,7 @@ use crate::client::{
 };
 use crate::constant::{G, N};
 use crate::{Credentials, SrpClient, SrpError};
+use crate::client::private;
 
 /// A **device** which is tracked against a user in the AWS Cognito user pool.
 ///
@@ -28,33 +29,37 @@ pub struct TrackedDevice {
     /// The format enforced by AWS Cognito is: `<region>_<pool id>`.
     ///
     /// For example: `us-east-1_SqmNeowUdp`.
-    pub pool_id: String,
+    pool_id: String,
 
     /// The username of the **user** who owns the registered device.
-    pub username: String,
+    username: String,
 
-    pub device_group_key: String,
-    pub device_key: String,
-    pub device_password: String,
+    device_group_key: String,
+    device_key: String,
+    device_password: String,
 }
+
+impl private::Sealed for TrackedDevice {}
 impl Credentials for TrackedDevice {}
 
 /// A **device** which is not yet tracked against a user in the AWS Cognito user pool.
 ///
 /// This device has not previously been confirmed, and thus does not have a password,
 /// and is not yet associated with a user (so cannot be used to bypass MFA challenges).
+#[derive(Debug, Eq, PartialEq, Clone)]
 pub struct UntrackedDevice {
     /// The ID of the AWS Cognito User Pool the device is registered with.
     ///
     /// The format enforced by AWS Cognito is: `<region>_<pool id>`.
     ///
     /// For example: `us-east-1_SqmNeowUdp`.
-    pub pool_id: String,
+    pool_id: String,
 
-    pub device_group_key: String,
-    pub device_key: String,
+    device_group_key: String,
+    device_key: String,
 }
 
+impl private::Sealed for UntrackedDevice {}
 impl Credentials for UntrackedDevice {}
 
 impl UntrackedDevice {
@@ -327,13 +332,13 @@ mod tests {
     #[test]
     fn test_auth_parameters_generates_successfully() {
         let client = SrpClient::<TrackedDevice, MockRng>::new(
-            TrackedDevice {
-                pool_id: "us-west-2_abc".to_string(),
-                username: "username".to_string(),
-                device_password: "password".to_string(),
-                device_group_key: "mock-device-group-key".to_string(),
-                device_key: "mock-device-key".to_string(),
-            },
+            TrackedDevice::new(
+                "us-west-2_abc",
+                "username",
+                "mock-device-group-key",
+                "mock-device-key",
+                "password",
+            ),
             "client_id",
             None,
         );
@@ -352,13 +357,13 @@ mod tests {
     #[test]
     fn test_verify_responds_predictably() {
         let client = SrpClient::<TrackedDevice, MockRng>::new(
-            TrackedDevice {
-                pool_id: "us-west-2_abc".to_string(),
-                username: "username".to_string(),
-                device_password: "password".to_string(),
-                device_group_key: "mock-device-group-key".to_string(),
-                device_key: "mock-device-key".to_string(),
-            },
+            TrackedDevice::new(
+                "us-west-2_abc",
+                "username",
+                "mock-device-group-key",
+                "mock-device-key",
+                "password",
+            ),
             "client_id",
             None,
         );
@@ -378,11 +383,11 @@ mod tests {
     #[test]
     fn test_password_verifier_responds_predictably() {
         let client = SrpClient::<_, MockRng>::new(
-            UntrackedDevice {
-                pool_id: "us-west-2_abc".to_string(),
-                device_group_key: "mock-device-group-key".to_string(),
-                device_key: "mock-device-key".to_string(),
-            },
+            UntrackedDevice::new(
+                "us-west-2_abc",
+                "mock-device-group-key",
+                "mock-device-key",
+            ),
             "client_id",
             None,
         );
@@ -400,13 +405,13 @@ mod tests {
     #[test]
     fn test_verify_handles_odd_length_values() {
         let client = SrpClient::<TrackedDevice, MockRng>::new(
-            TrackedDevice {
-                pool_id: "us-west-2_abc".to_string(),
-                username: "username".to_string(),
-                device_password: "password".to_string(),
-                device_group_key: "mock-device-group-key".to_string(),
-                device_key: "mock-device-key".to_string(),
-            },
+            TrackedDevice::new(
+                "us-west-2_abc",
+                "username",
+                "mock-device-group-key",
+                "mock-device-key",
+                "password",
+            ),
             "client_id",
             None,
         );
