@@ -39,7 +39,7 @@ pub fn get_untracked_device_srp_client(
     device_group_key: String,
 ) -> aws_cognito_srp::SrpClient<UntrackedDevice, rand::prelude::ThreadRng> {
     common::get_srp_client(
-        UntrackedDevice::new(dotenv!("POOL_ID"), &device_key, &device_group_key),
+        UntrackedDevice::new(dotenv!("POOL_ID"), &device_group_key, &device_key,),
         dotenv!("CLIENT_ID"),
         Some(dotenv!("CLIENT_SECRET")),
     )
