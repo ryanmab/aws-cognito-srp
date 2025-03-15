@@ -1,7 +1,6 @@
 use aws_sdk_cognitoidentityprovider::types::{
     AuthenticationResultType, ChallengeNameType, NewDeviceMetadataType,
 };
-use rand::Rng;
 
 use aws_cognito_srp::{UntrackedDevice, User};
 
@@ -9,7 +8,7 @@ use crate::common;
 
 pub async fn authenticate_as_user(
     cognito: &aws_sdk_cognitoidentityprovider::Client,
-    srp: &aws_cognito_srp::SrpClient<User, impl Rng + Default>,
+    srp: &aws_cognito_srp::SrpClient<User>,
 ) -> Option<AuthenticationResultType> {
     let response =
         common::request::send_initiate_auth_request(cognito, srp.get_auth_parameters()).await;
@@ -57,7 +56,7 @@ pub async fn authenticate_as_user(
 
 pub async fn confirm_new_device(
     cognito: &aws_sdk_cognitoidentityprovider::Client,
-    srp: &aws_cognito_srp::SrpClient<UntrackedDevice, impl Rng + Default>,
+    srp: &aws_cognito_srp::SrpClient<UntrackedDevice>,
     device_key: &String,
     access_token: &String,
 ) -> String {
@@ -74,7 +73,7 @@ pub async fn confirm_new_device(
 
 pub async fn authenticate_as_user_and_confirm_device(
     cognito: &aws_sdk_cognitoidentityprovider::Client,
-    srp: &aws_cognito_srp::SrpClient<User, impl Rng + Default>,
+    srp: &aws_cognito_srp::SrpClient<User>,
 ) -> (String, String, String) {
     let authentication_result = common::flow::authenticate_as_user(&cognito, &srp).await;
 

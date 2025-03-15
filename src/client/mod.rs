@@ -3,6 +3,7 @@ use std::cell::RefCell;
 use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
 use hmac::{Hmac, Mac};
 use log::info;
+use rand::rngs::OsRng;
 use rand::RngCore;
 use sha2::Sha256;
 
@@ -93,25 +94,21 @@ pub struct PasswordVerifierParameters {
 /// 2. [TrackedDevice] - For authenticating via SRP with a remembered device.
 /// 3. [UntrackedDevice] - For generating a password verifier for a new device during confirmation.
 #[derive(Debug)]
-pub struct SrpClient<C: Credentials, R: RngCore> {
+pub struct SrpClient<C: Credentials> {
     a: Vec<u8>,
     credentials: C,
     client_id: String,
     client_secret: Option<String>,
-    rand: RefCell<R>,
 }
 
-impl<C: Credentials, R: rand::Rng + Default> SrpClient<C, R> {
+impl<C: Credentials> SrpClient<C> {
     #[must_use]
-    pub fn new(credentials: C, client_id: &str, client_secret: Option<&str>) -> SrpClient<C, R> {
-        let mut rand = R::default();
-
+    pub fn new(credentials: C, client_id: &str, client_secret: Option<&str>) -> SrpClient<C> {
         Self {
-            a: helper::generate_a(&mut rand),
+            a: helper::generate_a(),
             credentials,
             client_id: client_id.into(),
-            client_secret: client_secret.map(|s| s.into()),
-            rand: RefCell::new(rand),
+            client_secret: client_secret.map(|s| s.into())
         }
     }
 

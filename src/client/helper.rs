@@ -3,6 +3,7 @@ use chrono::Utc;
 use digest::Digest;
 use log::info;
 use num_bigint::{BigInt, BigUint, Sign};
+use rand::rngs::mock::StepRng;
 use rand::{Rng, RngCore};
 use regex::Regex;
 
@@ -11,9 +12,18 @@ use crate::constant::{DERIVE_KEY_INFO, G, N};
 /// Generate client's secret `a` value for the client.
 ///
 /// This is a random 128 byte value.
-pub fn generate_a(rand: &mut impl RngCore) -> Vec<u8> {
+#[cfg(not(test))]
+pub fn generate_a() -> Vec<u8> {
     let mut a = [0u8; 128];
-    rand.fill_bytes(&mut a);
+    rand::rng().fill_bytes(&mut a);
+
+    a.to_vec()
+}
+
+#[cfg(test)]
+pub fn generate_a() -> Vec<u8> {
+    let mut a = [0u8; 128];
+    StepRng::new(0, 1).fill_bytes(&mut a);
 
     a.to_vec()
 }
@@ -75,16 +85,32 @@ pub fn compute_u<D: Digest>(a_pub: &[u8], b_pub: &[u8]) -> BigUint {
 
 /// Generate a random UTF-8 password (40 bytes), which can be used as a
 /// device password.
-pub fn generate_password(mut rand: impl RngCore) -> String {
+#[cfg(not(test))]
+pub fn generate_password() -> String {
     let mut password_random = [0u8; 40];
-    rand.fill(&mut password_random[..]);
+    rand::rng().fill(&mut password_random[..]);
+    BASE64.encode(password_random)
+}
+
+#[cfg(test)]
+pub fn generate_password() -> String {
+    let mut password_random = [0u8; 40];
+    StepRng::new(0, 1).fill(&mut password_random[..]);
     BASE64.encode(password_random)
 }
 
 /// Generate a random salt (16 bytes) which can be used to generate a verifier.
-pub fn generate_salt(mut rand: impl RngCore) -> Vec<u8> {
+#[cfg(not(test))]
+pub fn generate_salt() -> Vec<u8> {
     let mut salt = [0u8; 16];
-    rand.fill(&mut salt[..]);
+    rand::rng().fill(&mut salt[..]);
+    left_pad(hex::encode(salt).as_bytes(), 0)
+}
+
+#[cfg(test)]
+pub fn generate_salt() -> Vec<u8> {
+    let mut salt = [0u8; 16];
+    StepRng::new(0, 1).fill(&mut salt[..]);
     left_pad(hex::encode(salt).as_bytes(), 0)
 }
 
