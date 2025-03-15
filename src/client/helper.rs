@@ -1,7 +1,6 @@
 use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
 use chrono::Utc;
 use digest::Digest;
-use log::info;
 use num_bigint::{BigInt, BigUint, Sign};
 use rand::rngs::mock::StepRng;
 use rand::{Rng, RngCore};
@@ -140,7 +139,7 @@ pub fn get_timestamp() -> String {
         )
         .to_string();
 
-    info!("Generated timestamp for SRP calculations: {}", timestamp);
+    log::info!("Generated timestamp for SRP calculations: {}", timestamp);
 
     timestamp
 }

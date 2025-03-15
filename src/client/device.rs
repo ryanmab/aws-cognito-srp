@@ -2,7 +2,6 @@ use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
 use digest::{Digest, Mac, Output};
 use log::info;
 use num_bigint::BigUint;
-use rand::RngCore;
 use sha2::Sha256;
 
 use crate::client::helper::{

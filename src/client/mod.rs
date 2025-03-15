@@ -1,10 +1,6 @@
-use std::cell::RefCell;
-
 use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
 use hmac::{Hmac, Mac};
 use log::info;
-use rand::rngs::OsRng;
-use rand::RngCore;
 use sha2::Sha256;
 
 pub use device::TrackedDevice;
