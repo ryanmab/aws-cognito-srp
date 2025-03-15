@@ -24,7 +24,6 @@
 //! issued.
 //!
 //! ```no_run
-//! use rand::rngs::ThreadRng;
 //! use aws_cognito_srp::{AuthParameters, SrpClient, SrpError, User, VerificationParameters};
 //!
 //! let client_id = "";
@@ -46,7 +45,7 @@
 //!      "<password>"
 //! );
 //!
-//! let client = SrpClient::<_, ThreadRng>::new(user, client_id, client_secret);
+//! let client = SrpClient::new(user, client_id, client_secret);
 //!
 //! // Part 1: Generate the auth parameters for the initial `InitiateAuth` request
 //! let AuthParameters {
@@ -84,7 +83,6 @@
 //! `DEVICE_PASSWORD_VERIFIER` challenges are issued.
 //!
 //! ```no_run
-//! use rand::rngs::ThreadRng;
 //! use aws_cognito_srp::{AuthParameters, TrackedDevice, SrpClient, SrpError, User, VerificationParameters};
 //!
 //! let client_id = "";
@@ -110,7 +108,7 @@
 //!      "<device password>"
 //! );
 //!
-//! let client = SrpClient::<_, ThreadRng>::new(tracked_device, client_id, client_secret);
+//! let client = SrpClient::new(tracked_device, client_id, client_secret);
 //!
 //! // Part 1: Generate the challenge response parameters for the `RespondToAuthChallenge` request
 //! // when responding to the `DeviceSrpAuth` challenge issued by AWS Cognito.
@@ -147,7 +145,6 @@
 //! [device authentication flow](#device-authentication), citing the device key, along with the random password generated here.
 //!
 //! ```no_run
-//! use rand::rngs::ThreadRng;
 //! use aws_cognito_srp::{TrackedDevice, PasswordVerifierParameters, SrpClient, SrpError, User, UntrackedDevice};
 //!
 //! let client_id = "";
@@ -169,7 +166,7 @@
 //!      "<device key>"
 //! );
 //!
-//! let client = SrpClient::<_, ThreadRng>::new(untracked_device, client_id, client_secret);
+//! let client = SrpClient::new(untracked_device, client_id, client_secret);
 //!
 //! // Generate a new password, and the verifier parameters (verifier and salt) for the `ConfirmDevice`
 //! // request.
