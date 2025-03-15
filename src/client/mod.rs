@@ -108,7 +108,7 @@ impl<C: Credentials> SrpClient<C> {
             a: helper::generate_a(),
             credentials,
             client_id: client_id.into(),
-            client_secret: client_secret.map(|s| s.into())
+            client_secret: client_secret.map(|s| s.into()),
         }
     }
 
