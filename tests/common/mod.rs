@@ -2,7 +2,6 @@ use aws_config::BehaviorVersion;
 use aws_sdk_cognitoidentityprovider::types::AuthenticationResultType;
 use dotenvy::dotenv;
 use dotenvy_macro::dotenv;
-use rand::prelude::ThreadRng;
 
 use aws_cognito_srp::{Credentials, SrpClient};
 
@@ -18,7 +17,7 @@ pub fn get_srp_client<C: Credentials>(
     credentials: C,
     client_id: &str,
     client_secret: Option<&str>,
-) -> SrpClient<C, ThreadRng> {
+) -> SrpClient<C> {
     SrpClient::new(credentials, client_id, client_secret)
 }
 

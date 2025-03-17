@@ -2,7 +2,6 @@ use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
 use digest::{Digest, Mac, Output};
 use log::info;
 use num_bigint::BigUint;
-use rand::RngCore;
 use sha2::Sha256;
 
 use crate::client::helper::{
@@ -108,7 +107,7 @@ impl TrackedDevice {
     }
 }
 
-impl<R: RngCore + Default> SrpClient<TrackedDevice, R> {
+impl SrpClient<TrackedDevice> {
     /// Generate the authentication parameters for the initial `InitiateAuth` request.
     ///
     /// This begins the SRP authentication flow with AWS Cognito, and exchanges the various
@@ -226,7 +225,7 @@ impl<R: RngCore + Default> SrpClient<TrackedDevice, R> {
     }
 }
 
-impl<R: RngCore + Default> SrpClient<UntrackedDevice, R> {
+impl SrpClient<UntrackedDevice> {
     /// Generate a password, and the verifier parameters (verifier and salt) for the
     /// `ConfirmDevice` request.
     ///
@@ -234,8 +233,8 @@ impl<R: RngCore + Default> SrpClient<UntrackedDevice, R> {
     /// AWS Cognito records, and can be used during the authentication flow later to validate
     /// the password provided to authenticate.
     pub fn get_password_verifier(&self) -> PasswordVerifierParameters {
-        let random_password = generate_password(self.rand.borrow_mut());
-        let salt = generate_salt(self.rand.borrow_mut());
+        let random_password = generate_password();
+        let salt = generate_salt();
 
         // Setup the hash for the device
         let device_hash = self.compute_identity::<Sha256>(&random_password);
@@ -289,7 +288,7 @@ mod tests {
 
     use super::{SrpClient, TrackedDevice, UntrackedDevice, VerificationParameters};
 
-    const MOCK_A: &str = "27f0e74d7714e7985b87807ac0df0df5df93b1d3ff036bb0cd99b41d8dfa6fc522e12b9734f94aafb8c4c04213f8c1b91f049f9e841ad6f6f0ea971fcb76371f4eb88351a702958e14b678b3646578f406e74cfc7f0622c953f31101c80c8d82d7f9319f01148d4d012789d05afe4578f8a7390e763a13bd6a4d96e1c705f38fae9e0ee42cab2042fed2889118baf44dcc11d3d058ac752f652857d30607c891429981b1f2c46231a770765806820cc6bc01a89978b19fba952277346111934af218d3c62be732194a99a3d52d80fe742f7baa4657d6ae0c3f9df6357372fda51fd1c571cfacfad9dd23a382973ec45e0c98e0157abb8fdf64dd204453fdf8eab99c4ccdc9fa7b07df2f4440ff0c26d7267ce0039eaeeb943bf288ca046b00a2609bedb2f512f226800e4b1abb665c039bc2a08332fb40396a558558a68ccc6f4e4cbdb828830facfbf0457cf250d88682e71599e0a2e7e2808ee6f089383a6b298e38cc77970d03577ce10ec398a1198929bf56035d8ed2449cd962a8714dd7";
+    const MOCK_A: &str = "e13e5e4bdcb2670718d3141be1c00299211c244b6e0ec0c404e5c6c126fcefcbf3f5f165822a56e25f9906be1fba382a48eeb6b3915f12c91934e6ac4f18f0e2d20fdb77cba8ca0c5bbfda16c05686a6820ade1a5eeb1dfc551b96bed06ed8b14b218127d4d84f32ee9aa6fc32d100240a914d8708dd5bb68827a1a4be3dc4a129e1c08a4787739f6041dd966d1996c9ced9f72960f3e3c0e802d04beaa2e71c9af5a7d7dd1f3c695a80db20eb069f5bda0356ba9851a41a5c55ed68636e0aedacb1f7d370f25ef9186f5112866ad71aa825fda6991ac8d262b7a2765af07b65735cdca7e8d71f3b7d5c5d97297561e157ccdc40e034ecc71a38e534b1a2456962b5218bd533774462220d18c2ce8fb36e40fc61710f202df65d378eed2a8d811bcce5b2ee5013e3e8a3b3fde40dfb90f4d1e9eac28b3f396edeb119c98dae8d65aa17287767c4a38113b698312ff5ac351d10a5171e01ddf8fd1245c78716cf1610a60d0d82f94def26f646f91a347353276289af65f6c0bb6f95a84fa47c37";
 
     const MOCK_B: &str = "36ef01c6dde9fe503da333b1acc758ba";
 
@@ -331,7 +330,7 @@ mod tests {
 
     #[test]
     fn test_auth_parameters_generates_successfully() {
-        let client = SrpClient::<TrackedDevice, MockRng>::new(
+        let client = SrpClient::new(
             TrackedDevice::new(
                 "us-west-2_abc",
                 "username",
@@ -356,7 +355,7 @@ mod tests {
 
     #[test]
     fn test_verify_responds_predictably() {
-        let client = SrpClient::<TrackedDevice, MockRng>::new(
+        let client = SrpClient::new(
             TrackedDevice::new(
                 "us-west-2_abc",
                 "username",
@@ -372,7 +371,7 @@ mod tests {
             client.verify(MOCK_SECRET_BLOCK, MOCK_USER_ID, MOCK_SALT, MOCK_B),
             Ok(VerificationParameters {
                 password_claim_secret_block: MOCK_SECRET_BLOCK.into(),
-                password_claim_signature: "eJ7lk0Z2fWLgBRkT0r2375/WcR3XywRXN0hyJo7oxfk="
+                password_claim_signature: "KSRih5nKU36kjmcZh9Ig9aR25MWPtJpWAurpHg+Xo90="
                     .to_string(),
                 secret_hash: None,
                 timestamp: "Mon Feb 10 18:30:12 UTC 2025".to_string(),
@@ -382,7 +381,7 @@ mod tests {
 
     #[test]
     fn test_password_verifier_responds_predictably() {
-        let client = SrpClient::<_, MockRng>::new(
+        let client = SrpClient::new(
             UntrackedDevice::new("us-west-2_abc", "mock-device-group-key", "mock-device-key"),
             "client_id",
             None,
@@ -391,16 +390,16 @@ mod tests {
         assert_eq!(
             client.get_password_verifier(),
             PasswordVerifierParameters {
-                verifier: "GZtMUiE1vS74Q5Itqek8xirkRetCaCxc1Hvsd9YrZXypPXnhOazX4dVMILzdX2t9eJ+A0pdZ/SFgxsnzV+T6stVUopw0uPEmi5xx3/P8h4kVjax4u2sNIeiQ9SytYJlI25L5xJUNQ7zTUj1zK48mD8DQV7jjP0ipYVSaI95Fjfi2Cm7EhxjGz2vCLF+i6GwRlZ3j3Cc5M81VhIVrNLmBBQneCXYz4iLSMJ1x7y4h/DKvx347cApaT7AG2ZaA+CTOxjWdDsCHAAs8/H5vsgMM4ug2HtiHjjqfNDbHElB1iEJKHWyCzNvSY3WLBnpExPWDfTUA13h9grLqjKExilyjXpwvcopzflzDtwgPA1pVuFeU/S+pH1/7LgWv5N3N0/LGZD76ycaZQq926LOdrYFToOFujPmY+0UPbbeSbc/qey/utW8MsAbu452fW/5tlJeUd3Ev5oLyr5erLf0omaaxJ0r/LMnPq4anu+LIcX29r/RjOk+dDk9EiwtrjIVlBBMY".to_string(),
-                salt: "MDAwMTAyMDMwNDA1MDYwNzAwMDEwMjAzMDQwNTA2MDc=".to_string(),
-                password: "AAECAwQFBgcAAQIDBAUGBwABAgMEBQYHAAECAwQFBgcAAQIDBAUGBw==".to_string(),
+                verifier: "HbS1w1zEsZfmlcGdYPU5dFtGB/N6ecmrCu4ztV6PWkmGwrN588f3Iu+iwlayKIjnJDMjGgcJYrlDe+RvEWXifw6KnZiVhO2AS+qtI3Q/JbMPFjtcFECdBiD8vWC7g0rnoiHWlmk7vPMy+MJjBqVNqQXIREE+becM+NcZy+thnjgiziR6XCce0Ta46ZJEbaCLmtunuoxj4u1Q3/vdyK6kYGR7tJNSzG75MhLN0DHeUJifIc4UszuB++aSerll+nWrKSsjO8Q3YcVeboQTlGJhbS7n5wGXR/aiYtGwLi6YcdqbCH1ogh8je2KHBcQMCtH+KA7+73Oq9l2p7Fonud/+yFRLqfu4rskBVkS6mzpUuXws1WkG5FmWSnOsGUgja8ZBIaf8S9/cfYp7ciYefF2aWcQwigp5TLytosgLYBx6nvWz+n1k/OXiLmm0yQMS/b1If8G5TvVqvY8Qu3IzBugBSvLSF+UfgVxZV+xVTO5ykKPQkH4B+nQZtQ/lZNZyNJJT".to_string(),
+                salt: "MDAwMDAwMDAwMDAwMDAwMDAxMDAwMDAwMDAwMDAwMDA=".to_string(),
+                password: "AAAAAAAAAAABAAAAAAAAAAIAAAAAAAAAAwAAAAAAAAAEAAAAAAAAAA==".to_string(),
             }
         )
     }
 
     #[test]
     fn test_verify_handles_odd_length_values() {
-        let client = SrpClient::<TrackedDevice, MockRng>::new(
+        let client = SrpClient::new(
             TrackedDevice::new(
                 "us-west-2_abc",
                 "username",
@@ -422,7 +421,7 @@ mod tests {
             ),
             Ok(VerificationParameters {
                 password_claim_secret_block: MOCK_SECRET_BLOCK.into(),
-                password_claim_signature: "47qX0OjCipFsp0wJ9CR1tSU86F8/ua1Z6sxtjiGqSL8="
+                password_claim_signature: "cKgJ7Fze+M1NZQe5aMU5qj60nUlaRu+Q1ElXX3qMVv0="
                     .to_string(),
                 secret_hash: None,
                 timestamp: "Mon Feb 10 18:30:12 UTC 2025".to_string(),

@@ -1,7 +1,6 @@
 use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
 use digest::{Digest, Mac, Output};
 use log::info;
-use rand::RngCore;
 use sha2::Sha256;
 
 use crate::client::helper::{
@@ -41,7 +40,7 @@ impl User {
     }
 }
 
-impl<R: RngCore + Default> SrpClient<User, R> {
+impl SrpClient<User> {
     /// Generate the authentication parameters for the initial `InitiateAuth` request.
     ///
     /// This begins the SRP authentication flow with AWS Cognito, and exchanges the various
@@ -171,7 +170,7 @@ mod tests {
 
     use super::{SrpClient, User, VerificationParameters};
 
-    const MOCK_A: &str = "27f0e74d7714e7985b87807ac0df0df5df93b1d3ff036bb0cd99b41d8dfa6fc522e12b9734f94aafb8c4c04213f8c1b91f049f9e841ad6f6f0ea971fcb76371f4eb88351a702958e14b678b3646578f406e74cfc7f0622c953f31101c80c8d82d7f9319f01148d4d012789d05afe4578f8a7390e763a13bd6a4d96e1c705f38fae9e0ee42cab2042fed2889118baf44dcc11d3d058ac752f652857d30607c891429981b1f2c46231a770765806820cc6bc01a89978b19fba952277346111934af218d3c62be732194a99a3d52d80fe742f7baa4657d6ae0c3f9df6357372fda51fd1c571cfacfad9dd23a382973ec45e0c98e0157abb8fdf64dd204453fdf8eab99c4ccdc9fa7b07df2f4440ff0c26d7267ce0039eaeeb943bf288ca046b00a2609bedb2f512f226800e4b1abb665c039bc2a08332fb40396a558558a68ccc6f4e4cbdb828830facfbf0457cf250d88682e71599e0a2e7e2808ee6f089383a6b298e38cc77970d03577ce10ec398a1198929bf56035d8ed2449cd962a8714dd7";
+    const MOCK_A: &str = "e13e5e4bdcb2670718d3141be1c00299211c244b6e0ec0c404e5c6c126fcefcbf3f5f165822a56e25f9906be1fba382a48eeb6b3915f12c91934e6ac4f18f0e2d20fdb77cba8ca0c5bbfda16c05686a6820ade1a5eeb1dfc551b96bed06ed8b14b218127d4d84f32ee9aa6fc32d100240a914d8708dd5bb68827a1a4be3dc4a129e1c08a4787739f6041dd966d1996c9ced9f72960f3e3c0e802d04beaa2e71c9af5a7d7dd1f3c695a80db20eb069f5bda0356ba9851a41a5c55ed68636e0aedacb1f7d370f25ef9186f5112866ad71aa825fda6991ac8d262b7a2765af07b65735cdca7e8d71f3b7d5c5d97297561e157ccdc40e034ecc71a38e534b1a2456962b5218bd533774462220d18c2ce8fb36e40fc61710f202df65d378eed2a8d811bcce5b2ee5013e3e8a3b3fde40dfb90f4d1e9eac28b3f396edeb119c98dae8d65aa17287767c4a38113b698312ff5ac351d10a5171e01ddf8fd1245c78716cf1610a60d0d82f94def26f646f91a347353276289af65f6c0bb6f95a84fa47c37";
 
     const MOCK_B: &str = "36ef01c6dde9fe503da333b1acc758ba";
 
@@ -211,7 +210,7 @@ mod tests {
 
     #[test]
     fn test_auth_parameters_generates_successfully() {
-        let client = SrpClient::<User, MockRng>::new(
+        let client = SrpClient::<User>::new(
             User::new("us-west-2_abc", "test", "password"),
             "client_id",
             None,
@@ -230,7 +229,7 @@ mod tests {
 
     #[test]
     fn test_verify_responds_predictably() {
-        let client = SrpClient::<User, MockRng>::new(
+        let client = SrpClient::<User>::new(
             User::new("us-west-2_abc", "test", "password"),
             "client_id",
             None,
@@ -240,7 +239,7 @@ mod tests {
             client.verify(MOCK_SECRET_BLOCK, "user_id", MOCK_SALT, MOCK_B),
             Ok(VerificationParameters {
                 password_claim_secret_block: MOCK_SECRET_BLOCK.into(),
-                password_claim_signature: "pwRRxzRTl5tQrYyuVNotexHofIX4RZMRBFyuU/OYrbk="
+                password_claim_signature: "CdMptiJvn5EyrPYBBc8Ee1MbWh0t4uxdfnQ6TwEuAEI="
                     .to_string(),
                 secret_hash: None,
                 timestamp: "Mon Feb 10 18:30:12 UTC 2025".to_string(),
@@ -250,7 +249,7 @@ mod tests {
 
     #[test]
     fn test_verify_handles_odd_length_values() {
-        let client = SrpClient::<User, MockRng>::new(
+        let client = SrpClient::<User>::new(
             User::new("us-west-2_abc", "test", "password"),
             "client_id",
             None,
@@ -266,7 +265,7 @@ mod tests {
             ),
             Ok(VerificationParameters {
                 password_claim_secret_block: MOCK_SECRET_BLOCK.into(),
-                password_claim_signature: "DZdPZo5Ki7auWSNUQg/LDR/mDgKsNxgTo61iz6ymTLo="
+                password_claim_signature: "uHIrGhJ/thL3TGJn7o0wxBZCJdRGTBfBqiqziAD3DQU="
                     .to_string(),
                 secret_hash: None,
                 timestamp: "Mon Feb 10 18:30:12 UTC 2025".to_string(),
