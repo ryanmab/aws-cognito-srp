@@ -83,7 +83,13 @@ impl UntrackedDevice {
     /// 2. The **username** of the user who the device is remembered with.
     #[must_use]
     pub fn into_tracked(self, username: &str, device_password: &str) -> TrackedDevice {
-        TrackedDevice::new(self.pool_id.as_str(), username, self.device_group_key.as_str(), self.device_key.as_str(), device_password)
+        TrackedDevice::new(
+            self.pool_id.as_str(),
+            username,
+            self.device_group_key.as_str(),
+            self.device_key.as_str(),
+            device_password,
+        )
     }
 }
 

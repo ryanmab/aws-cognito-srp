@@ -76,14 +76,11 @@ impl SrpClient<User> {
         salt: &str,
         b: &str,
     ) -> Result<VerificationParameters, SrpError> {
-        let pool_name =
-            self.credentials
-                .pool_id
-                .split('_')
-                .nth(1)
-                .ok_or_else(|| SrpError::InvalidArgument(
-                    "Invalid pool_id must be in the form <region>_<pool id>".into(),
-                ))?;
+        let pool_name = self.credentials.pool_id.split('_').nth(1).ok_or_else(|| {
+            SrpError::InvalidArgument(
+                "Invalid pool_id must be in the form <region>_<pool id>".into(),
+            )
+        })?;
 
         let key = self.get_password_authentication_key(
             user_id,
@@ -161,9 +158,11 @@ impl SrpClient<User> {
 
         let mut d = D::new();
 
-        d.update(pool_id.split('_').nth(1).ok_or_else(|| SrpError::InvalidArgument(
-            "Invalid pool_id must be in the form <region>_<pool id>".into(),
-        ))?);
+        d.update(pool_id.split('_').nth(1).ok_or_else(|| {
+            SrpError::InvalidArgument(
+                "Invalid pool_id must be in the form <region>_<pool id>".into(),
+            )
+        })?);
         d.update(user_id.as_bytes());
         d.update(b":");
         d.update(password.as_bytes());

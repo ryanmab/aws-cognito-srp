@@ -1,5 +1,4 @@
 #![crate_name = "aws_cognito_srp"]
-
 #![deny(missing_docs)]
 #![deny(clippy::all)]
 #![warn(clippy::pedantic)]
