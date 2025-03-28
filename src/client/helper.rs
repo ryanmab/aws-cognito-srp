@@ -181,11 +181,17 @@ pub fn left_pad_to_even_length(data: &str, character: char) -> String {
 mod tests {
     #[test]
     fn test_left_pad_odd_to_even_length() {
-        assert_eq!(super::left_pad_to_even_length("11111", '0').to_ascii_lowercase(), "011111");
+        assert_eq!(
+            super::left_pad_to_even_length("11111", '0').to_ascii_lowercase(),
+            "011111"
+        );
     }
-    
+
     #[test]
     fn test_left_pad_already_even_to_even_length() {
-        assert_eq!(super::left_pad_to_even_length("111111", '0').to_ascii_lowercase(), "111111");
+        assert_eq!(
+            super::left_pad_to_even_length("111111", '0').to_ascii_lowercase(),
+            "111111"
+        );
     }
 }
