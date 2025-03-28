@@ -62,9 +62,13 @@ impl private::Sealed for UntrackedDevice {}
 impl Credentials for UntrackedDevice {}
 
 impl UntrackedDevice {
+    /// Create a new untracked device.
+    ///
+    /// This is a device which has not yet been confirmed with the AWS Cognito User Pool, and
+    /// thus does not have a password.
     #[must_use]
     pub fn new(pool_id: &str, device_group_key: &str, device_key: &str) -> Self {
-        UntrackedDevice {
+        Self {
             pool_id: pool_id.to_string(),
             device_group_key: device_group_key.to_string(),
             device_key: device_key.to_string(),
@@ -77,18 +81,19 @@ impl UntrackedDevice {
     /// 1. The **device password** (the random password generated for the device during
     ///    confirmation)
     /// 2. The **username** of the user who the device is remembered with.
+    #[must_use]
     pub fn into_tracked(self, username: &str, device_password: &str) -> TrackedDevice {
-        TrackedDevice {
-            pool_id: self.pool_id,
-            username: username.to_string(),
-            device_group_key: self.device_group_key,
-            device_key: self.device_key,
-            device_password: device_password.to_string(),
-        }
+        TrackedDevice::new(self.pool_id.as_str(), username, self.device_group_key.as_str(), self.device_key.as_str(), device_password)
     }
 }
 
 impl TrackedDevice {
+    /// Create a new tracked device.
+    ///
+    /// This is a device which has previously been confirmed, and thus has a password.
+    ///
+    /// When configured correctly, this device may be allowed to bypass some MFA challenges (depending
+    /// on the configuration of the AWS Cognito User Pool).
     #[must_use]
     pub fn new(
         pool_id: &str,
@@ -97,7 +102,7 @@ impl TrackedDevice {
         device_key: &str,
         device_password: &str,
     ) -> Self {
-        TrackedDevice {
+        Self {
             pool_id: pool_id.to_string(),
             username: username.to_string(),
             device_group_key: device_group_key.to_string(),
@@ -112,6 +117,7 @@ impl SrpClient<TrackedDevice> {
     ///
     /// This begins the SRP authentication flow with AWS Cognito, and exchanges the various
     /// initial public parameters which can then be used to validate the user's password.
+    #[must_use]
     pub fn get_auth_parameters(&self) -> AuthParameters {
         let TrackedDevice {
             username,
@@ -145,10 +151,10 @@ impl SrpClient<TrackedDevice> {
     ) -> Result<VerificationParameters, SrpError> {
         let key = self.get_device_authentication_key(
             &hex::decode(left_pad_to_even_length(b, '0')).map_err(|err| {
-                SrpError::InvalidArgument(format!("Invalid SRP_B. Received '{}'", err))
+                SrpError::InvalidArgument(format!("Invalid SRP_B. Received '{err}'"))
             })?,
             &hex::decode(left_pad_to_even_length(salt, '0')).map_err(|err| {
-                SrpError::InvalidArgument(format!("Invalid salt. Received '{}'", err))
+                SrpError::InvalidArgument(format!("Invalid salt. Received '{err}'"))
             })?,
         )?;
 
@@ -158,7 +164,7 @@ impl SrpClient<TrackedDevice> {
         msg.extend_from_slice(self.credentials.device_group_key.as_bytes());
         msg.extend_from_slice(self.credentials.device_key.as_bytes());
         msg.extend_from_slice(&BASE64.decode(secret_block).map_err(|err| {
-            SrpError::InvalidArgument(format!("Invalid base64 secret block. Received '{}'", err))
+            SrpError::InvalidArgument(format!("Invalid base64 secret block. Received '{err}'"))
         })?);
         msg.extend_from_slice(timestamp.as_bytes());
 
@@ -232,6 +238,7 @@ impl SrpClient<UntrackedDevice> {
     /// This generates a (new) random password, along with a salt and verifier which
     /// AWS Cognito records, and can be used during the authentication flow later to validate
     /// the password provided to authenticate.
+    #[must_use]
     pub fn get_password_verifier(&self) -> PasswordVerifierParameters {
         let random_password = generate_password();
         let salt = generate_salt();

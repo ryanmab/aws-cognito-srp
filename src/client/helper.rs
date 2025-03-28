@@ -116,7 +116,7 @@ pub fn generate_salt() -> Vec<u8> {
 /// Generate the derive data used when generating Authentication
 /// keys for Device and User verification.
 ///
-/// [https://github.com/aws-samples/aws-cognito-java-desktop-app/blob/master/src/main/java/com/amazonaws/sample/cognitoui/AuthenticationHelper.java#L56]
+/// <https://github.com/aws-samples/aws-cognito-java-desktop-app/blob/master/src/main/java/com/amazonaws/sample/cognitoui/AuthenticationHelper.java#L56>
 pub fn generate_key_derive_data() -> Vec<u8> {
     let mut key_derive_data: Vec<u8> = vec![];
     key_derive_data.extend_from_slice(DERIVE_KEY_INFO.as_bytes());
@@ -167,12 +167,12 @@ pub fn left_pad(data: &[u8], character: u8) -> Vec<u8> {
     bytes
 }
 
-/// Add left padding to a hex string (such as SRP_B) to ensure it is an even
+/// Add left padding to a hex string (such as `SRP_B`) to ensure it is an even
 /// length, before being decoded.
 pub fn left_pad_to_even_length(data: &str, character: char) -> String {
     if data.len() % 2 == 0 {
         return data.to_string();
     }
 
-    format!("{}{}", character, data)
+    format!("{character}{data}")
 }
