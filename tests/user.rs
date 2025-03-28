@@ -1,4 +1,4 @@
-mod common;
+pub mod common;
 
 #[tokio::test]
 async fn test_user_sign_in_works() {

@@ -17,6 +17,13 @@ mod private {
     pub trait Sealed {}
 }
 
+/// The credentials required to authenticate with AWS Cognito using the Secure Remote
+/// Password (SRP).
+///
+/// These come in three forms:
+/// 1. [`User`] - For authenticating via SRP with a user.
+/// 2. [`TrackedDevice`] - For authenticating via SRP with a remembered device.
+/// 3. [`UntrackedDevice`] - For generating a password verifier for a new device during confirmation.
 pub trait Credentials: private::Sealed {}
 
 /// The parameters required to initiate an authentication flow with AWS Cognito, when using the
@@ -40,7 +47,7 @@ pub struct AuthParameters {
 
     /// The device key of the tracked device.
     ///
-    /// This will only be returned when using [TrackedDevice] credentials.
+    /// This will only be returned when using [`TrackedDevice`] credentials.
     pub device_key: Option<String>,
 }
 
@@ -86,9 +93,9 @@ pub struct PasswordVerifierParameters {
 /// The client for interacting with parameters required for the Secure Remote Password (SRP) protocol.
 ///
 /// This client comes in three forms:
-/// 1. [User] - For authenticating via SRP with a user.
-/// 2. [TrackedDevice] - For authenticating via SRP with a remembered device.
-/// 3. [UntrackedDevice] - For generating a password verifier for a new device during confirmation.
+/// 1. [`User`] - For authenticating via SRP with a user.
+/// 2. [`TrackedDevice`] - For authenticating via SRP with a remembered device.
+/// 3. [`UntrackedDevice`] - For generating a password verifier for a new device during confirmation.
 #[derive(Debug)]
 pub struct SrpClient<C: Credentials> {
     a: Vec<u8>,
@@ -98,13 +105,17 @@ pub struct SrpClient<C: Credentials> {
 }
 
 impl<C: Credentials> SrpClient<C> {
+    /// Create a new SRP client.
+    ///
+    /// If the client secret is not provided, the client will not generate a secret hash
+    /// for use in the authentication flow.
     #[must_use]
-    pub fn new(credentials: C, client_id: &str, client_secret: Option<&str>) -> SrpClient<C> {
+    pub fn new(credentials: C, client_id: &str, client_secret: Option<&str>) -> Self {
         Self {
             a: helper::generate_a(),
             credentials,
             client_id: client_id.into(),
-            client_secret: client_secret.map(|s| s.into()),
+            client_secret: client_secret.map(std::convert::Into::into),
         }
     }
 

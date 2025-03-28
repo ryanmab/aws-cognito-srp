@@ -3,12 +3,12 @@ use num_bigint::BigUint;
 lazy_static! {
     /// A generator modulo `N`
     ///
-    /// [https://github.com/aws-samples/aws-cognito-java-desktop-app/blob/master/src/main/java/com/amazonaws/sample/cognitoui/AuthenticationHelper.java#L52]
+    /// <https://github.com/aws-samples/aws-cognito-java-desktop-app/blob/master/src/main/java/com/amazonaws/sample/cognitoui/AuthenticationHelper.java#L52>
     pub static ref G: BigUint = BigUint::from_bytes_be(&[2]);
 
     /// A large safe prime. All arithmetic is done modulo to this value.
     ///
-    /// [https://github.com/aws-samples/aws-cognito-java-desktop-app/blob/master/src/main/java/com/amazonaws/sample/cognitoui/AuthenticationHelper.java#L34]
+    /// <https://github.com/aws-samples/aws-cognito-java-desktop-app/blob/master/src/main/java/com/amazonaws/sample/cognitoui/AuthenticationHelper.java#L34>
     pub static ref N: BigUint = BigUint::from_bytes_be(
         &hex::decode(
             concat!(
@@ -31,6 +31,6 @@ lazy_static! {
         ).unwrap()
     );
 
-    /// [https://github.com/aws-samples/aws-cognito-java-desktop-app/blob/master/src/main/java/com/amazonaws/sample/cognitoui/AuthenticationHelper.java#L56]
+    /// <https://github.com/aws-samples/aws-cognito-java-desktop-app/blob/master/src/main/java/com/amazonaws/sample/cognitoui/AuthenticationHelper.java#L56>
     pub static ref DERIVE_KEY_INFO: String = String::from("Caldera Derived Key");
 }
