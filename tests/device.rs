@@ -1,6 +1,6 @@
 use aws_sdk_cognitoidentityprovider::types::ChallengeNameType;
 
-mod common;
+pub mod common;
 
 #[tokio::test]
 async fn test_device_sign_in_works() {
