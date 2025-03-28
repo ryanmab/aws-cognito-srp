@@ -84,10 +84,10 @@ impl UntrackedDevice {
     #[must_use]
     pub fn into_tracked(self, username: &str, device_password: &str) -> TrackedDevice {
         TrackedDevice::new(
-            self.pool_id.as_str(),
+            &self.pool_id,
             username,
-            self.device_group_key.as_str(),
-            self.device_key.as_str(),
+            &self.device_group_key,
+            &self.device_key,
             device_password,
         )
     }
