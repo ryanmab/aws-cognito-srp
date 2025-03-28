@@ -78,7 +78,7 @@ impl SrpClient<User> {
     ) -> Result<VerificationParameters, SrpError> {
         let pool_name = self.credentials.pool_id.split('_').nth(1).ok_or_else(|| {
             SrpError::InvalidArgument(
-                "Invalid pool_id must be in the form <region>_<pool id>".into(),
+                "Invalid pool_id must be in the form `<region>_<pool id>`".into(),
             )
         })?;
 
@@ -160,7 +160,7 @@ impl SrpClient<User> {
 
         d.update(pool_id.split('_').nth(1).ok_or_else(|| {
             SrpError::InvalidArgument(
-                "Invalid pool_id must be in the form <region>_<pool id>".into(),
+                "Invalid pool_id must be in the form `<region>_<pool id>`".into(),
             )
         })?);
         d.update(user_id.as_bytes());
