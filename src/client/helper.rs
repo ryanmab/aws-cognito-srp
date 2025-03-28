@@ -1,9 +1,12 @@
 use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
+#[cfg(not(test))]
 use chrono::Utc;
 use digest::Digest;
 use num_bigint::{BigInt, BigUint, Sign};
+#[cfg(test)]
 use rand::rngs::mock::StepRng;
 use rand::{Rng, RngCore};
+#[cfg(not(test))]
 use regex::Regex;
 
 use crate::constant::{DERIVE_KEY_INFO, G, N};
