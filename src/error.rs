@@ -1,6 +1,6 @@
 use thiserror::Error;
 
-/// An error occurred while generating a parameters for the Secure Remote Password (SRP)
+/// An error occurred while generating parameters for the Secure Remote Password (SRP)
 /// protocol.
 #[derive(Debug, Error, PartialEq, Eq)]
 pub enum SrpError {
