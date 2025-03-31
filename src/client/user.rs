@@ -69,6 +69,7 @@ impl SrpClient<User> {
     ///
     /// Returns an error if any of the input values are invalid. For example, if the `b` or `salt`
     /// values are not valid hex strings.
+    #[must_use]
     pub fn verify(
         &self,
         secret_block: &str,
