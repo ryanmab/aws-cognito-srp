@@ -148,6 +148,7 @@ impl SrpClient<TrackedDevice> {
     /// issued by AWS Cognito in response to the `RespondToAuthChallenge` request.
     ///
     /// These parameters verify to AWS Cognito that the password known by the client is correct.
+    #[must_use]
     pub fn verify(
         &self,
         secret_block: &str,
@@ -407,7 +408,7 @@ mod tests {
                 salt: "MDAwMDAwMDAwMDAwMDAwMDAxMDAwMDAwMDAwMDAwMDA=".to_string(),
                 password: "AAAAAAAAAAABAAAAAAAAAAIAAAAAAAAAAwAAAAAAAAAEAAAAAAAAAA==".to_string(),
             }
-        )
+        );
     }
 
     #[test]

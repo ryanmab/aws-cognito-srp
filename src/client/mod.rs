@@ -2,6 +2,7 @@ use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
 use hmac::{Hmac, Mac};
 use log::info;
 use sha2::Sha256;
+use std::mem;
 
 pub use device::TrackedDevice;
 pub use device::UntrackedDevice;
@@ -120,12 +121,17 @@ impl<C: Credentials> SrpClient<C> {
     }
 
     /// Replace the credentials used internally by the client for the SRP
-    /// protocol.
+    /// protocol, and return the previous credentials.
     ///
     /// **Note:** This will not update the client ID, client secret, or the pre-generated
     /// `a` value.
-    pub fn replace_credentials(&mut self, credentials: C) {
-        self.credentials = credentials;
+    pub fn replace_credentials(&mut self, credentials: C) -> C {
+        mem::replace(&mut self.credentials, credentials)
+    }
+
+    /// Take the credentials which were used by the SRP client.
+    pub fn take_credentials(self) -> C {
+        self.credentials
     }
 
     /// Get the secret hash to be used on login and challenge requests to AWS Cognito.
@@ -143,5 +149,43 @@ impl<C: Credentials> SrpClient<C> {
 
             Some(hash)
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::SrpClient;
+    use crate::{PasswordVerifierParameters, UntrackedDevice};
+
+    #[test]
+    pub fn test_taking_and_replacing_credentials() {
+        let untracked_device = UntrackedDevice::new(
+            "eu_west_1-abc123",
+            "mock-device-group-key",
+            "mock-device-key",
+        );
+
+        let client = SrpClient::new(
+            untracked_device,
+            "some-client-id",
+            Some("some-client-secret"),
+        );
+
+        // Generate the password verifier for the confirm device flow
+        let password_verifier = client.get_password_verifier();
+        assert!(matches!(
+            password_verifier,
+            PasswordVerifierParameters { .. }
+        ));
+
+        // Complete the confirm device flow, and take the (untracked device) credentials back
+        let taken_credentials = client.take_credentials();
+        assert!(matches!(taken_credentials, UntrackedDevice { .. }));
+
+        // Convert the untracked device into a tracked device (as we have now confirmed the device now),
+        // and create a new client with the tracked device credentials
+        let tracked_device =
+            taken_credentials.into_tracked("mock-username", &password_verifier.password);
+        let _ = SrpClient::new(tracked_device, "some-client-id", Some("some-client-secret"));
     }
 }
