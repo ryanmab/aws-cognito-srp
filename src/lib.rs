@@ -151,7 +151,7 @@
 //! This request passes in a verifier and salt for a random password generated for the untracked device. And, once confirmed, subsequent logins can use
 //! [device authentication flow](#device-authentication), citing the device key, along with the random password generated here.
 //!
-//! ```no_run
+//! ```
 //! use aws_cognito_srp::{TrackedDevice, PasswordVerifierParameters, SrpClient, SrpError, User, UntrackedDevice};
 //!
 //! let client_id = "";
@@ -185,14 +185,12 @@
 //!
 //! // Part 2: Once the `ConfirmDevice` request has succeeded, the untracked device can then be converted
 //! // into a tracked device, which can be used for Device authentication later.
-//! let tracked_device = TrackedDevice::from(
-//!     client.take_credentials()
-//!         .into_tracked(
-//!             // The username of the user which the device is tracked with.
-//!             "<username>",
-//!             &password
-//!         )
-//! );
+//! let tracked_device = client.take_credentials()
+//!     .into_tracked(
+//!         // The username of the user which the device is tracked with.
+//!         "<username>",
+//!         &password
+//!     );
 //!
 //! # Ok::<(), SrpError>(())
 //! ```

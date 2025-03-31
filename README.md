@@ -1,4 +1,4 @@
-![Coverage](https://api.coveragerobot.com/v1/graph/github/ryanmab/aws-cognito-srp/badge.svg?token=076524f002a920322c2378e304139475625ba1e1027cc3e543)
+[![Coverage](https://api.coveragerobot.com/v1/graph/github/ryanmab/aws-cognito-srp/badge.svg?token=076524f002a920322c2378e304139475625ba1e1027cc3e543)](https://coveragerobot.com)
 [![Crates.io Version](https://img.shields.io/crates/v/aws-cognito-srp)](https://crates.io/crates/aws-cognito-srp)
 ![Crates.io Total Downloads](https://img.shields.io/crates/d/aws-cognito-srp)
 [![docs.rs](https://img.shields.io/docsrs/aws-cognito-srp)](https://docs.rs/aws-cognito-srp)
@@ -183,14 +183,12 @@ let PasswordVerifierParameters {
 
 // Part 2: Once the `ConfirmDevice` request has succeeded, the untracked device can then be converted
 // into a tracked device, which can be used for Device authentication later.
-let tracked_device = TrackedDevice::from(
-    client.take_credentials()
-        .into_tracked(
-            // The username of the user which the device is tracked with.
-            "<username>",
-            &password
-        )
-);
+let tracked_device = client.take_credentials()
+    .into_tracked(
+        // The username of the user which the device is tracked with.
+        "<username>",
+        &password
+    );
 
 ```
 
