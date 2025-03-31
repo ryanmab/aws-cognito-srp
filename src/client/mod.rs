@@ -1,8 +1,8 @@
-use std::mem;
 use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
 use hmac::{Hmac, Mac};
 use log::info;
 use sha2::Sha256;
+use std::mem;
 
 pub use device::TrackedDevice;
 pub use device::UntrackedDevice;

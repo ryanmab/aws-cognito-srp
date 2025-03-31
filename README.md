@@ -173,7 +173,7 @@ let untracked_device = UntrackedDevice::new(
 
 let client = SrpClient::new(untracked_device, client_id, client_secret);
 
-// Generate a new password, and the verifier parameters (verifier and salt) for the `ConfirmDevice`
+// Part 1: Generate a password, and the verifier parameters (verifier and salt) for the `ConfirmDevice`
 // request.
 let PasswordVerifierParameters {
     verifier, // PasswordVerifier
@@ -181,8 +181,16 @@ let PasswordVerifierParameters {
     password // The devices password (should be stored to use with device authentication later)
 } = client.get_password_verifier();
 
-// The untracked device can then be converted into a tracked device, which can be used for Device
-// authentication, after the `ConfirmDevice` request has succeeded.
+// Part 2: Once the `ConfirmDevice` request has succeeded, the untracked device can then be converted
+// into a tracked device, which can be used for Device authentication later.
+let tracked_device = TrackedDevice::from(
+    client.take_credentials()
+        .into_tracked(
+            // The username of the user which the device is tracked with.
+            "<username>",
+            &password
+        )
+);
 
 ```
 
