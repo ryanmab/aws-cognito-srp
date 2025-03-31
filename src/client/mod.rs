@@ -32,6 +32,7 @@ pub trait Credentials: private::Sealed {}
 ///
 /// For the full request structure see documentation: [InitiateAuth](https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_InitiateAuth.html)
 #[derive(Debug, Eq, PartialEq)]
+#[must_use]
 pub struct AuthParameters {
     /// The **public** `A` for the client.
     pub a: String,
@@ -57,6 +58,7 @@ pub struct AuthParameters {
 ///
 /// For the full request structure see documentation: [RespondToAuthChallenge](https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_RespondToAuthChallenge.html)
 #[derive(Debug, Eq, PartialEq)]
+#[must_use]
 pub struct VerificationParameters {
     /// The secret block provided by AWS Cognito at the start of the authentication flow.
     pub password_claim_secret_block: String,
@@ -121,12 +123,23 @@ impl<C: Credentials> SrpClient<C> {
     }
 
     /// Replace the credentials used internally by the client for the SRP
-    /// protocol, and return the previous credentials.
+    /// protocol with a new set of credentials of the same type, and return
+    /// the previous credentials.
     ///
-    /// **Note:** This will not update the client ID, client secret, or the pre-generated
+    /// **Note:** This _will not_ update the client ID, client secret, or the pre-generated
     /// `a` value.
     pub fn replace_credentials(&mut self, credentials: C) -> C {
         mem::replace(&mut self.credentials, credentials)
+    }
+
+    /// Convert the client into a new client which handles a different type of credentials, preserving
+    /// the existing client ID and client secret in the process.
+    ///
+    /// **Note:** This _will_ update the pre-generated `a` value, meaning the client will not be
+    /// able to continue an existing authentication flow (as the `a` value is used in the calculation
+    /// of parameters in the SRP flow).
+    pub fn into<T: Credentials>(self, credentials: T) -> SrpClient<T> {
+        SrpClient::new(credentials, &self.client_id, self.client_secret.as_deref())
     }
 
     /// Take the credentials which were used by the SRP client.

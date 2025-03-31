@@ -123,7 +123,6 @@ impl SrpClient<TrackedDevice> {
     ///
     /// This begins the SRP authentication flow with AWS Cognito, and exchanges the various
     /// initial public parameters which can then be used to validate the user's password.
-    #[must_use]
     pub fn get_auth_parameters(&self) -> AuthParameters {
         let TrackedDevice {
             username,
@@ -148,7 +147,11 @@ impl SrpClient<TrackedDevice> {
     /// issued by AWS Cognito in response to the `RespondToAuthChallenge` request.
     ///
     /// These parameters verify to AWS Cognito that the password known by the client is correct.
-    #[must_use]
+    ///
+    /// ## Errors
+    ///
+    /// Returns an error if any of the input values are invalid. For example, if the `b` or `salt`
+    /// values are not valid hex strings.
     pub fn verify(
         &self,
         secret_block: &str,
@@ -311,36 +314,6 @@ mod tests {
     const MOCK_SECRET_BLOCK: &str = "9ae77ec7154c14dcc487b47707fee4b4920cb96d8a8c045e4c8df879a7b375524aa736acdec6c9ad4ea606774d00621b";
 
     const MOCK_USER_ID: &str = "abc-1234-678";
-
-    struct MockRng {
-        data: [u8; 8],
-        index: usize,
-    }
-    impl RngCore for MockRng {
-        fn next_u32(&mut self) -> u32 {
-            unimplemented!()
-        }
-
-        fn next_u64(&mut self) -> u64 {
-            unimplemented!()
-        }
-
-        fn fill_bytes(&mut self, dest: &mut [u8]) {
-            for byte in dest.iter_mut() {
-                *byte = self.data[self.index];
-                self.index = (self.index + 1) % self.data.len();
-            }
-        }
-    }
-
-    impl Default for MockRng {
-        fn default() -> Self {
-            MockRng {
-                data: [0, 1, 2, 3, 4, 5, 6, 7],
-                index: 0,
-            }
-        }
-    }
 
     #[test]
     fn test_auth_parameters_generates_successfully() {
