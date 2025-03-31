@@ -1,9 +1,12 @@
 use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
+#[cfg(not(test))]
 use chrono::Utc;
 use digest::Digest;
 use num_bigint::{BigInt, BigUint, Sign};
+#[cfg(test)]
 use rand::rngs::mock::StepRng;
 use rand::{Rng, RngCore};
+#[cfg(not(test))]
 use regex::Regex;
 
 use crate::constant::{DERIVE_KEY_INFO, G, N};
@@ -116,7 +119,7 @@ pub fn generate_salt() -> Vec<u8> {
 /// Generate the derive data used when generating Authentication
 /// keys for Device and User verification.
 ///
-/// [https://github.com/aws-samples/aws-cognito-java-desktop-app/blob/master/src/main/java/com/amazonaws/sample/cognitoui/AuthenticationHelper.java#L56]
+/// <https://github.com/aws-samples/aws-cognito-java-desktop-app/blob/master/src/main/java/com/amazonaws/sample/cognitoui/AuthenticationHelper.java#L56>
 pub fn generate_key_derive_data() -> Vec<u8> {
     let mut key_derive_data: Vec<u8> = vec![];
     key_derive_data.extend_from_slice(DERIVE_KEY_INFO.as_bytes());
@@ -167,12 +170,31 @@ pub fn left_pad(data: &[u8], character: u8) -> Vec<u8> {
     bytes
 }
 
-/// Add left padding to a hex string (such as SRP_B) to ensure it is an even
+/// Add left padding to a hex string (such as `SRP_B`) to ensure it is an even
 /// length, before being decoded.
 pub fn left_pad_to_even_length(data: &str, character: char) -> String {
     if data.len() % 2 == 0 {
         return data.to_string();
     }
 
-    format!("{}{}", character, data)
+    format!("{character}{data}")
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_left_pad_odd_to_even_length() {
+        assert_eq!(
+            super::left_pad_to_even_length("11111", '0').to_ascii_lowercase(),
+            "011111"
+        );
+    }
+
+    #[test]
+    fn test_left_pad_already_even_to_even_length() {
+        assert_eq!(
+            super::left_pad_to_even_length("111111", '0').to_ascii_lowercase(),
+            "111111"
+        );
+    }
 }

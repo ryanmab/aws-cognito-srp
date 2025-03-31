@@ -30,9 +30,10 @@ impl private::Sealed for User {}
 impl Credentials for User {}
 
 impl User {
+    /// Create a new user which is already registered with the AWS Cognito user pool.
     #[must_use]
     pub fn new<'a>(pool_id: &'a str, username: &'a str, password: &'a str) -> Self {
-        User {
+        Self {
             pool_id: pool_id.into(),
             username: username.into(),
             password: password.into(),
@@ -45,6 +46,7 @@ impl SrpClient<User> {
     ///
     /// This begins the SRP authentication flow with AWS Cognito, and exchanges the various
     /// initial public parameters which can then be used to validate the user's password.
+    #[must_use]
     pub fn get_auth_parameters(&self) -> AuthParameters {
         let User { username, .. } = &self.credentials;
 
@@ -62,6 +64,11 @@ impl SrpClient<User> {
     /// AWS Cognito in response to the `InitiateAuth` request.
     ///
     /// These parameters verify to Cognito that the password known by the client is correct.
+    ///
+    /// ## Errors
+    ///
+    /// Returns an error if any of the input values are invalid. For example, if the `b` or `salt`
+    /// values are not valid hex strings.
     pub fn verify(
         &self,
         secret_block: &str,
@@ -69,22 +76,19 @@ impl SrpClient<User> {
         salt: &str,
         b: &str,
     ) -> Result<VerificationParameters, SrpError> {
-        let pool_name =
-            self.credentials
-                .pool_id
-                .split("_")
-                .nth(1)
-                .ok_or(SrpError::InvalidArgument(
-                    "Invalid pool_id must be in the form <region>_<pool id>".into(),
-                ))?;
+        let pool_name = self.credentials.pool_id.split('_').nth(1).ok_or_else(|| {
+            SrpError::InvalidArgument(
+                "Invalid pool_id must be in the form `<region>_<pool id>`".into(),
+            )
+        })?;
 
         let key = self.get_password_authentication_key(
             user_id,
             &hex::decode(left_pad_to_even_length(b, '0')).map_err(|err| {
-                SrpError::InvalidArgument(format!("Invalid SRP_B. Received '{}'", err))
+                SrpError::InvalidArgument(format!("Invalid SRP_B. Received '{err}'"))
             })?,
             &hex::decode(left_pad_to_even_length(salt, '0')).map_err(|err| {
-                SrpError::InvalidArgument(format!("Invalid salt. Received '{}'", err))
+                SrpError::InvalidArgument(format!("Invalid salt. Received '{err}'"))
             })?,
         )?;
 
@@ -94,7 +98,7 @@ impl SrpClient<User> {
         msg.extend_from_slice(pool_name.as_bytes());
         msg.extend_from_slice(user_id.as_bytes());
         msg.extend_from_slice(&BASE64.decode(secret_block).map_err(|err| {
-            SrpError::InvalidArgument(format!("Invalid base64 secret block. Received '{}'", err))
+            SrpError::InvalidArgument(format!("Invalid base64 secret block. Received '{err}'"))
         })?);
         msg.extend_from_slice(timestamp.as_bytes());
 
@@ -154,9 +158,11 @@ impl SrpClient<User> {
 
         let mut d = D::new();
 
-        d.update(pool_id.split("_").nth(1).ok_or(SrpError::InvalidArgument(
-            "Invalid pool_id must be in the form <region>_<pool id>".into(),
-        ))?);
+        d.update(pool_id.split('_').nth(1).ok_or_else(|| {
+            SrpError::InvalidArgument(
+                "Invalid pool_id must be in the form `<region>_<pool id>`".into(),
+            )
+        })?);
         d.update(user_id.as_bytes());
         d.update(b":");
         d.update(password.as_bytes());
