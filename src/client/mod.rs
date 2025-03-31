@@ -125,7 +125,7 @@ impl<C: Credentials> SrpClient<C> {
     ///
     /// **Note:** This will not update the client ID, client secret, or the pre-generated
     /// `a` value.
-    pub fn replace_credentials(&mut self, credentials: C) -> impl Credentials {
+    pub fn replace_credentials(&mut self, credentials: impl Credentials) -> C {
         mem::replace(&mut self.credentials, credentials)
     }
 
