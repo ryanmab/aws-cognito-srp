@@ -128,6 +128,26 @@ impl<C: Credentials> SrpClient<C> {
     ///
     /// **Note:** This _will not_ update the client ID, client secret, or the pre-generated
     /// `a` value.
+    ///
+    /// ## Example
+    ///
+    /// ```rust
+    /// use aws_cognito_srp::{PasswordVerifierParameters, SrpClient, UntrackedDevice};
+    ///
+    /// let mut client = SrpClient::new(
+    ///     UntrackedDevice::new("mock-pool-id", "mock-device-group-key", "mock-device-key"),
+    ///     "mock-client-id",
+    ///     None,
+    /// );
+    ///
+    /// let PasswordVerifierParameters { .. } = client.get_password_verifier();
+    ///
+    /// let untracked_device = client.replace_credentials(
+    ///     UntrackedDevice::new("mock-new-pool-id", "mock-new-device-group-key", "mock-new-device-key")
+    /// );
+    ///
+    /// # assert!(matches!(untracked_device, UntrackedDevice { .. }));
+    /// ```
     pub fn replace_credentials(&mut self, credentials: C) -> C {
         mem::replace(&mut self.credentials, credentials)
     }
@@ -138,11 +158,55 @@ impl<C: Credentials> SrpClient<C> {
     /// **Note:** This _will_ update the pre-generated `a` value, meaning the client will not be
     /// able to continue an existing authentication flow (as the `a` value is used in the calculation
     /// of parameters in the SRP flow).
+    ///
+    /// ## Example
+    ///
+    /// ```rust
+    /// use aws_cognito_srp::{PasswordVerifierParameters, SrpClient, TrackedDevice, UntrackedDevice};
+    ///
+    /// let client = SrpClient::new(
+    ///     UntrackedDevice::new("mock-pool-id", "mock-device-group-key", "mock-device-key"),
+    ///     "mock-client-id",
+    ///     None,
+    /// );
+    ///
+    /// let PasswordVerifierParameters { password, .. } = client.get_password_verifier();
+    ///
+    /// let client = client.into(
+    ///     TrackedDevice::new(
+    ///         "mock-pool-id",
+    ///         "mock-username",
+    ///         "mock-device-group-key",
+    ///         "mock-device-key",
+    ///         &password
+    ///    )
+    /// );
+    ///
+    /// # assert!(matches!(client, SrpClient::<TrackedDevice> { .. }));
+    /// ```
     pub fn into<T: Credentials>(self, credentials: T) -> SrpClient<T> {
         SrpClient::new(credentials, &self.client_id, self.client_secret.as_deref())
     }
 
     /// Take the credentials which were used by the SRP client.
+    ///
+    /// ## Example
+    ///
+    /// ```rust
+    /// use aws_cognito_srp::{PasswordVerifierParameters, SrpClient, UntrackedDevice};
+    ///
+    /// let client = SrpClient::new(
+    ///     UntrackedDevice::new("mock-pool-id", "mock-device-group-key", "mock-device-key"),
+    ///     "mock-client-id",
+    ///     None,
+    /// );
+    ///
+    /// let PasswordVerifierParameters { .. } = client.get_password_verifier();
+    ///
+    /// let untracked_device = client.take_credentials();
+    ///
+    /// # assert!(matches!(untracked_device, UntrackedDevice { .. }));
+    /// ```
     pub fn take_credentials(self) -> C {
         self.credentials
     }

@@ -83,13 +83,7 @@ impl UntrackedDevice {
     /// 2. The **username** of the user who the device is remembered with.
     #[must_use]
     pub fn into_tracked(self, username: &str, device_password: &str) -> TrackedDevice {
-        TrackedDevice::new(
-            &self.pool_id,
-            username,
-            &self.device_group_key,
-            &self.device_key,
-            device_password,
-        )
+        TrackedDevice::from_untracked(&self, username, device_password)
     }
 }
 
@@ -115,6 +109,27 @@ impl TrackedDevice {
             device_key: device_key.to_string(),
             device_password: device_password.to_string(),
         }
+    }
+
+    /// Convert the untracked device into a tracked device.
+    ///
+    /// This requires:
+    /// 1. The **device password** (the random password generated for the device during
+    ///    confirmation)
+    /// 2. The **username** of the user who the device is remembered with.
+    #[must_use]
+    pub fn from_untracked(
+        untracked: &UntrackedDevice,
+        username: &str,
+        device_password: &str,
+    ) -> Self {
+        Self::new(
+            &untracked.pool_id,
+            username,
+            &untracked.device_group_key,
+            &untracked.device_key,
+            device_password,
+        )
     }
 }
 
