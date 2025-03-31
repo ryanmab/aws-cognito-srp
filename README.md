@@ -1,4 +1,4 @@
-![Coverage](https://api.coveragerobot.com/v1/graph/github/ryanmab/aws-cognito-srp/badge.svg?token=076524f002a920322c2378e304139475625ba1e1027cc3e543)
+[![Coverage](https://api.coveragerobot.com/v1/graph/github/ryanmab/aws-cognito-srp/badge.svg?token=076524f002a920322c2378e304139475625ba1e1027cc3e543)](https://coveragerobot.com)
 [![Crates.io Version](https://img.shields.io/crates/v/aws-cognito-srp)](https://crates.io/crates/aws-cognito-srp)
 ![Crates.io Total Downloads](https://img.shields.io/crates/d/aws-cognito-srp)
 [![docs.rs](https://img.shields.io/docsrs/aws-cognito-srp)](https://docs.rs/aws-cognito-srp)
