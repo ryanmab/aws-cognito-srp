@@ -1,3 +1,4 @@
+use std::mem;
 use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
 use hmac::{Hmac, Mac};
 use log::info;
@@ -120,12 +121,17 @@ impl<C: Credentials> SrpClient<C> {
     }
 
     /// Replace the credentials used internally by the client for the SRP
-    /// protocol.
+    /// protocol, and return the previous credentials.
     ///
     /// **Note:** This will not update the client ID, client secret, or the pre-generated
     /// `a` value.
-    pub fn replace_credentials(&mut self, credentials: C) {
-        self.credentials = credentials;
+    pub fn replace_credentials(&mut self, credentials: C) -> impl Credentials {
+        mem::replace(&mut self.credentials, credentials)
+    }
+
+    /// Take the credentials which were used by the SRP client.
+    pub fn take_credentials(self) -> C {
+        self.credentials
     }
 
     /// Get the secret hash to be used on login and challenge requests to AWS Cognito.

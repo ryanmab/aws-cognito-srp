@@ -407,7 +407,7 @@ mod tests {
                 salt: "MDAwMDAwMDAwMDAwMDAwMDAxMDAwMDAwMDAwMDAwMDA=".to_string(),
                 password: "AAAAAAAAAAABAAAAAAAAAAIAAAAAAAAAAwAAAAAAAAAEAAAAAAAAAA==".to_string(),
             }
-        )
+        );
     }
 
     #[test]
