@@ -183,14 +183,12 @@ let PasswordVerifierParameters {
 
 // Part 2: Once the `ConfirmDevice` request has succeeded, the untracked device can then be converted
 // into a tracked device, which can be used for Device authentication later.
-let tracked_device = TrackedDevice::from(
-    client.take_credentials()
-        .into_tracked(
-            // The username of the user which the device is tracked with.
-            "<username>",
-            &password
-        )
-);
+let tracked_device = client.take_credentials()
+    .into_tracked(
+        // The username of the user which the device is tracked with.
+        "<username>",
+        &password
+    );
 
 ```
 
