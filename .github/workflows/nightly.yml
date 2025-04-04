@@ -108,6 +108,9 @@ jobs:
       - name: cargo test --locked
         run: cargo test --locked --all-features --all-targets
 
+      - name: cargo test --doc
+        run: cargo test --locked --all-features --doc
+
   update:
     runs-on: ubuntu-latest
     name: Test (beta / updated)
@@ -152,6 +155,10 @@ jobs:
         env:
           RUSTFLAGS: -D deprecated
 
+      - name: cargo test --doc
+        run: cargo test --locked --all-features --doc
+        env:
+          RUSTFLAGS: -D deprecated
 
   teardown:
     name: Teardown Environment

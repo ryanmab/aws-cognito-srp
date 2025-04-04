@@ -26,14 +26,8 @@ jobs:
         with:
           components: rustfmt
 
-      - name: Install Cargo Rdme
-        run: cargo install cargo-rdme
-
       - name: cargo fmt --check
         run: cargo fmt --check
-
-      - name: cargo rdme --check
-        run: cargo rdme --check
 
       - name: cargo-semver-checks
         uses: obi1kenobi/cargo-semver-checks-action@v2
@@ -63,11 +57,6 @@ jobs:
         with:
           reporter: 'github-pr-check'
           github_token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: cargo doc
-        run: cargo doc --no-deps --all-features
-        env:
-          RUSTDOCFLAGS: --cfg docsrs
 
   msrv:
     runs-on: ubuntu-latest
@@ -102,8 +91,19 @@ jobs:
       - name: Install Cargo Docs-rs
         uses: dtolnay/install@cargo-docs-rs
 
+      - name: Install Cargo Rdme
+        run: cargo install cargo-rdme
+
+      - name: cargo rdme --check
+        run: cargo rdme --check
+
       - name: Build docs
         run: cargo docs-rs
+
+      - name: cargo doc
+        run: cargo doc --no-deps --all-features
+        env:
+          RUSTDOCFLAGS: --cfg docsrs
 
   setup:
     name: Setup Environment
