@@ -89,10 +89,26 @@ jobs:
       - name: cargo +${{ matrix.msrv }} check
         run: cargo check
 
+  docs:
+    runs-on: ubuntu-latest
+    name: Docs (nightly)
+    needs: [ lint ]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install nightly
+        uses: dtolnay/rust-toolchain@nightly
+
+      - name: Install Cargo Docs-rs
+        uses: dtolnay/install@cargo-docs-rs
+
+      - name: Build docs
+        run: cargo docs-rs
+
   setup:
     name: Setup Environment
     runs-on: ubuntu-latest
-    needs: [ clippy, msrv ]
+    needs: [ clippy, msrv, docs ]
     outputs:
       user_pool_id: ${{ steps.outputs.outputs.user_pool_id }}
       test_user_pool_client_id: ${{ steps.outputs.outputs.user_pool_client_id }}
@@ -192,6 +208,27 @@ jobs:
       - name: cargo test --doc
         run: cargo test --locked --all-features --doc
 
+  minimal:
+    runs-on: ubuntu-latest
+    name: Test (minimal versions)
+    needs: [setup]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install nightly for -Zminimal-versions
+        uses: dtolnay/rust-toolchain@nightly
+
+      - run: rustup default stable
+
+      - name: cargo update -Zminimal-versions
+        run: cargo +nightly update -Zminimal-versions
+
+      - name: cargo test
+        run: cargo test --locked --all-features --all-targets
+
   coverage:
     name: Coverage
     runs-on: ubuntu-latest
@@ -253,7 +290,7 @@ jobs:
   teardown:
     name: Teardown Environment
     runs-on: ubuntu-latest
-    needs: [ setup, test, coverage ]
+    needs: [ setup, test, minimal, coverage ]
     if: always() && needs.setup.result != 'skipped'
     steps:
       - uses: actions/checkout@v4
