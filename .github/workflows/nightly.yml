@@ -76,8 +76,34 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.region }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
       - name: Install nightly
         uses: dtolnay/rust-toolchain@nightly
+
+      - name: Mask outputs
+        run: |
+          # Mask all of the outputs in the workflow logs - its not _that_ sensitive as the user pool
+          # is temporary, but its still a good idea to mask it
+          echo "::add-mask::${{ needs.setup.outputs.test_user_pool_client_id }}"
+          echo "::add-mask::${{ needs.setup.outputs.test_user_pool_client_secret }}"
+
+      - name: Setup environment variables
+        uses: SpicyPizza/create-envfile@v2.0
+        with:
+          envkey_POOL_ID: ${{ needs.setup.outputs.user_pool_id }}
+          envkey_REGION: ${{ env.region }}
+          envkey_CLIENT_ID: ${{ needs.setup.outputs.test_user_pool_client_id }}
+          envkey_CLIENT_SECRET: ${{ needs.setup.outputs.test_user_pool_client_secret }}
+          envkey_USER_EMAIL: ${{ secrets.INTEGRATION_TEST_USER_EMAIL }}
+          envkey_USER_PASSWORD: ${{ secrets.INTEGRATION_TEST_USER_PASSWORD }}
+          directory: ./
+          file_name: .env
+          fail_on_empty: false
 
       - name: cargo test --locked
         run: cargo test --locked --all-features --all-targets
@@ -89,8 +115,34 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install beta
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.region }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Install nightly
         uses: dtolnay/rust-toolchain@beta
+
+      - name: Mask outputs
+        run: |
+          # Mask all of the outputs in the workflow logs - its not _that_ sensitive as the user pool
+          # is temporary, but its still a good idea to mask it
+          echo "::add-mask::${{ needs.setup.outputs.test_user_pool_client_id }}"
+          echo "::add-mask::${{ needs.setup.outputs.test_user_pool_client_secret }}"
+
+      - name: Setup environment variables
+        uses: SpicyPizza/create-envfile@v2.0
+        with:
+          envkey_POOL_ID: ${{ needs.setup.outputs.user_pool_id }}
+          envkey_REGION: ${{ env.region }}
+          envkey_CLIENT_ID: ${{ needs.setup.outputs.test_user_pool_client_id }}
+          envkey_CLIENT_SECRET: ${{ needs.setup.outputs.test_user_pool_client_secret }}
+          envkey_USER_EMAIL: ${{ secrets.INTEGRATION_TEST_USER_EMAIL }}
+          envkey_USER_PASSWORD: ${{ secrets.INTEGRATION_TEST_USER_PASSWORD }}
+          directory: ./
+          file_name: .env
+          fail_on_empty: false
 
       - name: cargo update
         run: cargo update
