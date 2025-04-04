@@ -2,113 +2,25 @@ on:
   pull_request:
   push:
     branches: [ main ]
-    tags: [ 'v*' ]
+  schedule:
+    - cron:  '7 7 * * *'
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
-name: Build
+permissions:
+  contents: read
+
+name: Nightly
 
 env:
   region: eu-west-2
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    name: Lint
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install stable
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt
-
-      - name: cargo fmt --check
-        run: cargo fmt --check
-
-      - name: cargo-semver-checks
-        uses: obi1kenobi/cargo-semver-checks-action@v2
-        continue-on-error: true
-
-  clippy:
-    runs-on: ubuntu-latest
-    name: Clippy (${{ matrix.toolchain }})
-    needs: [ lint ]
-
-    strategy:
-      fail-fast: false
-      matrix:
-        toolchain: [ stable, beta ]
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install ${{ matrix.toolchain }}
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: ${{ matrix.toolchain }}
-          components: clippy
-
-      - name: cargo clippy
-        uses: giraffate/clippy-action@v1
-        with:
-          reporter: 'github-pr-check'
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
-  msrv:
-    runs-on: ubuntu-latest
-    name: MSRV (${{ matrix.msrv }})
-    needs: [ lint ]
-
-    strategy:
-      matrix:
-        msrv: [ "1.65.0" ]
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install ${{ matrix.msrv }}
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: ${{ matrix.msrv }}
-
-      - name: cargo +${{ matrix.msrv }} check
-        run: cargo check
-
-  docs:
-    runs-on: ubuntu-latest
-    name: Docs (nightly)
-    needs: [ lint ]
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install nightly
-        uses: dtolnay/rust-toolchain@nightly
-
-      - name: Install Cargo Docs-rs
-        uses: dtolnay/install@cargo-docs-rs
-
-      - name: Install Cargo Rdme
-        run: cargo install cargo-rdme
-
-      - name: cargo rdme --check
-        run: cargo rdme --check
-
-      - name: Build docs
-        run: cargo docs-rs
-
-      - name: cargo doc
-        run: cargo doc --no-deps --all-features
-        env:
-          RUSTDOCFLAGS: --cfg docsrs
-
   setup:
     name: Setup Environment
     runs-on: ubuntu-latest
-    needs: [ clippy, msrv, docs ]
     outputs:
       user_pool_id: ${{ steps.outputs.outputs.user_pool_id }}
       test_user_pool_client_id: ${{ steps.outputs.outputs.user_pool_client_id }}
@@ -157,17 +69,10 @@ jobs:
           echo "user_pool_client_id=$(terraform output -raw test_user_pool_client_id)" >> $GITHUB_OUTPUT
           echo "user_pool_client_secret=$(terraform output -raw test_user_pool_client_secret)" >> $GITHUB_OUTPUT
 
-  test:
-    name: Tests (${{ matrix.os }} / ${{ matrix.toolchain }})
-    runs-on: ${{ matrix.os }}
-    needs: [ setup ]
-
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ ubuntu-latest, macos-latest, windows-latest ]
-        toolchain: [ stable, beta ]
-
+  nightly:
+    runs-on: ubuntu-latest
+    name: Test (nightly)
+    needs: [setup]
     steps:
       - uses: actions/checkout@v4
 
@@ -177,10 +82,8 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - name: Install ${{ matrix.toolchain }}
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: ${{ matrix.toolchain }}
+      - name: Install nightly
+        uses: dtolnay/rust-toolchain@nightly
 
       - name: Mask outputs
         run: |
@@ -208,9 +111,9 @@ jobs:
       - name: cargo test --doc
         run: cargo test --locked --all-features --doc
 
-  minimal:
+  update:
     runs-on: ubuntu-latest
-    name: Test (minimal versions)
+    name: Test (beta / updated)
     needs: [setup]
     steps:
       - uses: actions/checkout@v4
@@ -221,11 +124,8 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - name: Install stable
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Install nightly for -Zminimal-versions
-        uses: dtolnay/rust-toolchain@nightly
+      - name: Install nightly
+        uses: dtolnay/rust-toolchain@beta
 
       - name: Mask outputs
         run: |
@@ -247,76 +147,23 @@ jobs:
           file_name: .env
           fail_on_empty: false
 
-      - run: rustup default stable
-
-      - name: cargo update -Zdirect-minimal-versions
-        run: cargo +nightly update -Zdirect-minimal-versions
+      - name: cargo update
+        run: cargo update
 
       - name: cargo test
         run: cargo test --locked --all-features --all-targets
+        env:
+          RUSTFLAGS: -D deprecated
 
-  coverage:
-    name: Coverage
-    runs-on: ubuntu-latest
-    needs: [ setup ]
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ${{ env.region }}
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-      - name: Install nightly
-        uses: dtolnay/rust-toolchain@nightly
-        with:
-          components: llvm-tools-preview
-
-      - name: cargo install cargo-llvm-cov
-        uses: taiki-e/install-action@cargo-llvm-cov
-
-      - name: Setup environment variables
-        uses: SpicyPizza/create-envfile@v2.0
-        with:
-          envkey_POOL_ID: ${{ needs.setup.outputs.user_pool_id }}
-          envkey_REGION: ${{ env.region }}
-          envkey_CLIENT_ID: ${{ needs.setup.outputs.test_user_pool_client_id }}
-          envkey_CLIENT_SECRET: ${{ needs.setup.outputs.test_user_pool_client_secret }}
-          envkey_USER_EMAIL: ${{ secrets.INTEGRATION_TEST_USER_EMAIL }}
-          envkey_USER_PASSWORD: ${{ secrets.INTEGRATION_TEST_USER_PASSWORD }}
-          file_name: .env
-          fail_on_empty: false
-
-      - run: cargo +nightly llvm-cov --locked --all-features --lcov --output-path lcov_unit.info
-
-      - run: cargo +nightly llvm-cov --locked --doc --all-features --lcov --output-path lcov_docs.info
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: coverage
-          path: lcov_*.info
-
-      - uses: coverage-robot/action@v1.0.8
-        with:
-          token: ${{ secrets.COVERAGE_TOKEN }}
-          files: |
-            lcov_unit.info
-          tag: unit-tests
-        continue-on-error: true
-
-      - uses: coverage-robot/action@v1.0.8
-        with:
-          token: ${{ secrets.COVERAGE_TOKEN }}
-          files: |
-            lcov_docs.info
-          tag: doc-tests
-        continue-on-error: true
+      - name: cargo test --doc
+        run: cargo test --locked --all-features --doc
+        env:
+          RUSTFLAGS: -D deprecated
 
   teardown:
     name: Teardown Environment
     runs-on: ubuntu-latest
-    needs: [ setup, test, minimal, coverage ]
+    needs: [ setup, nightly, update ]
     if: always() && needs.setup.result != 'skipped'
     steps:
       - uses: actions/checkout@v4
@@ -345,24 +192,3 @@ jobs:
             -var="integration_test_user_email=${{ secrets.INTEGRATION_TEST_USER_EMAIL }}" \
             -var="integration_test_user_password=${{ secrets.INTEGRATION_TEST_USER_PASSWORD }}" \
             -var="aws_region=${{ env.region }}"
-
-  publish:
-    name: Publish Crate
-    needs: [ test, coverage ]
-    if: ${{ startsWith(github.ref, 'refs/tags/') }}
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install stable
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Login to crates.io
-        run: cargo login ${{ secrets.CRATES_IO_API_TOKEN }}
-
-      - name: Install cargo-release
-        run: cargo install cargo-release
-
-      - name: Publish version
-        run: cargo release ${GITHUB_REF#refs/tags/v} -vv --no-tag --no-push --allow-branch HEAD --execute --no-confirm
