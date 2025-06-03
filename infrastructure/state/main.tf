@@ -18,18 +18,6 @@ resource "aws_s3_bucket_versioning" "terraform_state" {
   }
 }
 
-resource "aws_dynamodb_table" "terraform_state_lock" {
-  name           = "aws-cognito-srp-tf-state"
-  read_capacity  = 1
-  write_capacity = 1
-  hash_key       = "LockID"
-
-  attribute {
-    name = "LockID"
-    type = "S"
-  }
-}
-
 resource "aws_s3_bucket_lifecycle_configuration" "state_lifecycle" {
   bucket = aws_s3_bucket.terraform_state.id
 
@@ -62,3 +50,4 @@ resource "aws_s3_bucket_lifecycle_configuration" "state_lifecycle" {
     aws_s3_bucket.terraform_state
   ]
 }
+
