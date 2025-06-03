@@ -336,7 +336,7 @@ jobs:
             -backend-config="bucket=aws-cognito-srp-tf-state" \
             -backend-config="key=ci/${{ github.run_id }}/terraform.tfstate" \
             -backend-config="region=${{ env.region }}" \
-            -backend-config="dynamodb_table=aws-cognito-srp-tf-state"
+            -backend-config="use_lockfile=true"
 
       - name: Run destroy
         working-directory: ./infrastructure/tests
