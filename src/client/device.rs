@@ -392,9 +392,9 @@ mod tests {
         assert_eq!(
             client.get_password_verifier(),
             PasswordVerifierParameters {
-                verifier: "HbS1w1zEsZfmlcGdYPU5dFtGB/N6ecmrCu4ztV6PWkmGwrN588f3Iu+iwlayKIjnJDMjGgcJYrlDe+RvEWXifw6KnZiVhO2AS+qtI3Q/JbMPFjtcFECdBiD8vWC7g0rnoiHWlmk7vPMy+MJjBqVNqQXIREE+becM+NcZy+thnjgiziR6XCce0Ta46ZJEbaCLmtunuoxj4u1Q3/vdyK6kYGR7tJNSzG75MhLN0DHeUJifIc4UszuB++aSerll+nWrKSsjO8Q3YcVeboQTlGJhbS7n5wGXR/aiYtGwLi6YcdqbCH1ogh8je2KHBcQMCtH+KA7+73Oq9l2p7Fonud/+yFRLqfu4rskBVkS6mzpUuXws1WkG5FmWSnOsGUgja8ZBIaf8S9/cfYp7ciYefF2aWcQwigp5TLytosgLYBx6nvWz+n1k/OXiLmm0yQMS/b1If8G5TvVqvY8Qu3IzBugBSvLSF+UfgVxZV+xVTO5ykKPQkH4B+nQZtQ/lZNZyNJJT".to_string(),
+                verifier: "AMCke3IWf+kmxs3TSTUkI1OxH41sZAA2Wo5J9/S54AGlwojsRTag7CT3DTR1LQd4NswKwe+6EN6RtYicnLGwS29UdACZGsTmYbTHxgj/pPIih8TIALmdh1FpjxwET/HWNSXXDd/k9IghsjkqEjyA/r3YihWByPUFDGLuZruUBy0rOIiD6tcRhRdthn4p7tSXHAI/c/u9+XtTNjHjJhxbhcz2oBxSRkSO4jAlTChcInfkfbtMTjUMtKTtjWbkHsulH6JUPfQz5EV7z5FmcMIsGDm3cJm8jYVW5X9yn8/cQPBSJKm6lGtX9KCSqXYzSnsDZxrdBrG+W0Q5M4DSQhZEd5YYP7LK5XSl6VL2XFDqaHsbLhYr/vaI1Bxzq+zLO1AkR1Ezufsam0dzNej9+1qeLeCnzxjnPtkQglRese1A09jFFnDd5iTah/llz8P1UIidU+VvKesleczgT3ZbtYz+Ocvdn4jQgU8YFqQm65PQJc0NrxAtNdO7GKanVjkWOsCggQ==".to_string(),
                 salt: "MDAwMDAwMDAwMDAwMDAwMDAxMDAwMDAwMDAwMDAwMDA=".to_string(),
-                password: "AAAAAAAAAAABAAAAAAAAAAIAAAAAAAAAAwAAAAAAAAAEAAAAAAAAAA==".to_string(),
+                password: "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQ==".to_string(),
             }
         );
     }
