@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "terraform_state" {
-  bucket = "aws-cognito-srp-tf-state"
+  bucket = "aws-cognito-srp-terraform-state"
 
   lifecycle {
     prevent_destroy = true

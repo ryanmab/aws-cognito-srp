@@ -131,7 +131,7 @@ jobs:
         working-directory: ./infrastructure/tests
         run: |
           terraform init -input=false \
-            -backend-config="bucket=aws-cognito-srp-tf-state" \
+            -backend-config="bucket=aws-cognito-srp-terraform-state" \
             -backend-config="key=ci/${{ github.run_id }}/terraform.tfstate" \
             -backend-config="region=${{ env.region }}" \
             -backend-config="use_lockfile=true"
@@ -332,7 +332,7 @@ jobs:
         working-directory: ./infrastructure/tests
         run: |
           terraform init -input=false \
-            -backend-config="bucket=aws-cognito-srp-tf-state" \
+            -backend-config="bucket=aws-cognito-srp-terraform-state" \
             -backend-config="key=ci/${{ github.run_id }}/terraform.tfstate" \
             -backend-config="region=${{ env.region }}" \
             -backend-config="use_lockfile=true"
