@@ -175,7 +175,7 @@ mod tests {
 
     use super::{SrpClient, User, VerificationParameters};
 
-    const MOCK_A: &str = "e13e5e4bdcb2670718d3141be1c00299211c244b6e0ec0c404e5c6c126fcefcbf3f5f165822a56e25f9906be1fba382a48eeb6b3915f12c91934e6ac4f18f0e2d20fdb77cba8ca0c5bbfda16c05686a6820ade1a5eeb1dfc551b96bed06ed8b14b218127d4d84f32ee9aa6fc32d100240a914d8708dd5bb68827a1a4be3dc4a129e1c08a4787739f6041dd966d1996c9ced9f72960f3e3c0e802d04beaa2e71c9af5a7d7dd1f3c695a80db20eb069f5bda0356ba9851a41a5c55ed68636e0aedacb1f7d370f25ef9186f5112866ad71aa825fda6991ac8d262b7a2765af07b65735cdca7e8d71f3b7d5c5d97297561e157ccdc40e034ecc71a38e534b1a2456962b5218bd533774462220d18c2ce8fb36e40fc61710f202df65d378eed2a8d811bcce5b2ee5013e3e8a3b3fde40dfb90f4d1e9eac28b3f396edeb119c98dae8d65aa17287767c4a38113b698312ff5ac351d10a5171e01ddf8fd1245c78716cf1610a60d0d82f94def26f646f91a347353276289af65f6c0bb6f95a84fa47c37";
+    const MOCK_A: &str = "b1ce118779e27c1c015d7a226ecae2ea1fcd017049e4f5c6f9908c686d496dce12a1c017a7523d43e2f3a6bb7e75e266bab0471e0720030edb64d8b5aef428356bc72198d41d319cf36eb0c4b4063fb99f90bc3b25b0d1196f84836bc05be0dfe1e6d1e21ba4c77098f6e6119127981395b0f4da67e26f63ecbfb2ded5d9c091c9850c08f0c372e5101df27967250254d6748a75c9be2f59324d31241f950d79224af0d5ff1c169af541b04a063bd0d4f79216a9da1e1874bc041b97ca2d456310f0b29f3644eca4d0e0c21660cbc5774a7319746bf53024a3bbb9c1251002854d1e6fac951d3a160771cdaf681a95e8cd51eb0630c825cd6227f22edefd35b3789df41dfca6cbd4d90e90ec7e38d3cbdf2b5f3534b016267f6a42190690d4225131811c6ea3b8265cff2fc44497887995eb95357747c3db40dab7199af3b9cbaba28a75d800d809421c5da1b0a24ec3120b3738750dcd42a61d1e9d272118ec2e6db632c241ab33558502dc9bbac1f4a34b3243082b89dcc0620a626d83a483";
 
     const MOCK_B: &str = "36ef01c6dde9fe503da333b1acc758ba";
 
@@ -214,7 +214,7 @@ mod tests {
             client.verify(MOCK_SECRET_BLOCK, "user_id", MOCK_SALT, MOCK_B),
             Ok(VerificationParameters {
                 password_claim_secret_block: MOCK_SECRET_BLOCK.into(),
-                password_claim_signature: "CdMptiJvn5EyrPYBBc8Ee1MbWh0t4uxdfnQ6TwEuAEI="
+                password_claim_signature: "apNSb5GZpJciVc6cVNkDf4elCMoWUZcH4aukLlMPiFA="
                     .to_string(),
                 secret_hash: None,
                 timestamp: "Mon Feb 10 18:30:12 UTC 2025".to_string(),
@@ -240,7 +240,7 @@ mod tests {
             ),
             Ok(VerificationParameters {
                 password_claim_secret_block: MOCK_SECRET_BLOCK.into(),
-                password_claim_signature: "uHIrGhJ/thL3TGJn7o0wxBZCJdRGTBfBqiqziAD3DQU="
+                password_claim_signature: "bVzjSe43mY37A6ZuzEVU5cr6QY1WeV3BPfdVJo0c2/8="
                     .to_string(),
                 secret_hash: None,
                 timestamp: "Mon Feb 10 18:30:12 UTC 2025".to_string(),
