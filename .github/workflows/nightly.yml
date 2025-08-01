@@ -158,7 +158,7 @@ jobs:
         env:
           RUSTFLAGS: -D deprecated
 
-      - uses: ryanmab/incident-io-alert@v0.1
+      - uses: ryanmab/incident-io-alert@v0.1.0
         if: failure()
         with:
           alert_source_id: ${{ secrets.ALERT_SOURCE_ID }}
