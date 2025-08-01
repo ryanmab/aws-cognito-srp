@@ -158,6 +158,19 @@ jobs:
         env:
           RUSTFLAGS: -D deprecated
 
+      - uses: ryanmab/incident-io-alert@v0.1
+        if: failure()
+        with:
+          alert_source_id: ${{ secrets.ALERT_SOURCE_ID }}
+          alert_source_token: ${{ secrets.ALERT_SOURCE_TOKEN }}
+          title: "AWS Cognito SRP repository: Nightly build failure"
+          status: firing
+          description: |
+            The nightly build for the AWS Cognito SRP repository has failed.
+            
+            This would indicate that there is an upcoming set of breaking changes to Rust, or 
+            other dependencies, which will require an update to the AWS Cognito SRP library.
+
   teardown:
     name: Teardown Environment
     runs-on: ubuntu-latest
