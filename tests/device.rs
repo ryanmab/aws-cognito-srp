@@ -12,8 +12,12 @@ async fn test_device_sign_in_works() {
     let (device_key, device_group_key, password) =
         common::flow::authenticate_as_user_and_confirm_device(&cognito, &user_srp).await;
 
-    let response =
-        common::request::send_initiate_auth_request(&cognito, &user_srp, user_srp.get_auth_parameters()).await;
+    let response = common::request::send_initiate_auth_request(
+        &cognito,
+        &user_srp,
+        user_srp.get_auth_parameters(),
+    )
+    .await;
 
     let challenge_parameters = response
         .challenge_parameters

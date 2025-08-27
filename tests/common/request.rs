@@ -5,7 +5,10 @@ use aws_sdk_cognitoidentityprovider::types::builders::DeviceSecretVerifierConfig
 use aws_sdk_cognitoidentityprovider::types::{AuthFlowType, ChallengeNameType};
 use dotenvy_macro::dotenv;
 
-use aws_cognito_srp::{AuthParameters, Credentials, PasswordVerifierParameters, SrpClient, TrackedDevice, User, VerificationParameters};
+use aws_cognito_srp::{
+    AuthParameters, Credentials, PasswordVerifierParameters, SrpClient, TrackedDevice, User,
+    VerificationParameters,
+};
 
 pub async fn send_initiate_auth_request(
     cognito: &aws_sdk_cognitoidentityprovider::Client,

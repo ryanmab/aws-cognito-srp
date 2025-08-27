@@ -111,10 +111,7 @@ impl TrackedDevice {
     ///    confirmation)
     /// 2. The **username** of the user who the device is remembered with.
     #[must_use]
-    pub fn from_untracked(
-        untracked: &UntrackedDevice,
-        device_password: &str,
-    ) -> Self {
+    pub fn from_untracked(untracked: &UntrackedDevice, device_password: &str) -> Self {
         Self::new(
             &untracked.pool_id,
             &untracked.device_group_key,
@@ -130,10 +127,7 @@ impl SrpClient<TrackedDevice> {
     /// This begins the SRP authentication flow with AWS Cognito, and exchanges the various
     /// initial public parameters which can then be used to validate the user's password.
     pub fn get_auth_parameters(&self) -> AuthParameters {
-        let TrackedDevice {
-            device_key,
-            ..
-        } = &self.credentials;
+        let TrackedDevice { device_key, .. } = &self.credentials;
 
         info!(
             d = device_key.as_str();

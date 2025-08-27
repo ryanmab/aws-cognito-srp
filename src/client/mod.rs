@@ -206,7 +206,11 @@ impl<C: Credentials> SrpClient<C> {
     /// used for the `InitiateAuth` or `RespondToAuthChallenge` request.
     ///
     /// Calculation is: `BASE64(HMAC_SHA256(<client secret>, <user id> + <client id>))`
-    pub(crate) fn get_secret_hash_for_user_id(&self, user_id: &str, client_id: &str) -> Option<String> {
+    pub(crate) fn get_secret_hash_for_user_id(
+        &self,
+        user_id: &str,
+        client_id: &str,
+    ) -> Option<String> {
         self.client_secret.as_ref().and_then(|secret| {
             let mut hmac = HmacSha256::new_from_slice(secret.as_bytes()).ok()?;
             hmac.update(user_id.as_bytes());
