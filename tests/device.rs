@@ -13,7 +13,7 @@ async fn test_device_sign_in_works() {
         common::flow::authenticate_as_user_and_confirm_device(&cognito, &user_srp).await;
 
     let response =
-        common::request::send_initiate_auth_request(&cognito, user_srp.get_auth_parameters()).await;
+        common::request::send_initiate_auth_request(&cognito, &user_srp, user_srp.get_auth_parameters()).await;
 
     let challenge_parameters = response
         .challenge_parameters
@@ -41,6 +41,7 @@ async fn test_device_sign_in_works() {
 
     let response = common::request::send_password_verifier_auth_challenge_request(
         &cognito,
+        &user_srp,
         user_id,
         parameters,
         auth_session.clone(),
@@ -61,6 +62,7 @@ async fn test_device_sign_in_works() {
 
     let response = common::request::send_device_srp_auth_challenge_request(
         &cognito,
+        &device_srp,
         device_srp.get_auth_parameters(),
         user_id,
         &device_key,
@@ -88,7 +90,6 @@ async fn test_device_sign_in_works() {
             challenge_parameters
                 .get("SECRET_BLOCK")
                 .expect("Cognito should return a secret block"),
-            user_id,
             challenge_parameters
                 .get("SALT")
                 .expect("Cognito should return a salt for SRP"),
@@ -100,6 +101,7 @@ async fn test_device_sign_in_works() {
 
     let response = common::request::send_device_password_verifier_auth_challenge_request(
         &cognito,
+        &device_srp,
         user_id,
         parameters,
         auth_session,

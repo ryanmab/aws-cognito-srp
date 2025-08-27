@@ -58,16 +58,16 @@
 //! let AuthParameters {
 //!     a, // SRP_A
 //!     username, // USERNAME
-//!     secret_hash, // SECRET_HASH (if required)
 //!     device_key // DEVICE_KEY
 //! } = client.get_auth_parameters();
+//!
+//! let secret_hash = client.get_secret_hash(); // SECRET_HASH (if required)
 //!
 //! // Part 2: Generate the challenge response parameters for the `PASSWORD_VERIFIER` challenge issued
 //! // by Cognito in response to the `InitiateAuth` request.
 //! let VerificationParameters {
 //!     password_claim_secret_block, // PASSWORD_CLAIM_SECRET_BLOCK
 //!     password_claim_signature, // PASSWORD_CLAIM_SIGNATURE
-//!     secret_hash, // SECRET_HASH (if required)
 //!     timestamp // TIMESTAMP
 //! } = client.verify(
 //!     "SECRET_BLOCK_FROM_INITIATE_AUTH_RESPONSE",
@@ -106,9 +106,6 @@
 //!      // The ID of the AWS Cognito User Pool the user is registered with.
 //!      "<pool id>",
 //!
-//!      // The username of the user which the device is tracked with.
-//!      "<username>",
-//!
 //!      // The tracked device.
 //!      "<device group key>",
 //!      "<device key>",
@@ -122,20 +119,19 @@
 //! let AuthParameters {
 //!     a, // SRP_A
 //!     username, // USERNAME
-//!     secret_hash, // SECRET_HASH (if required)
 //!     device_key // DEVICE_KEY
 //! } = client.get_auth_parameters();
+//!
+//! let secret_hash = client.get_secret_hash("<username of the owner of the tracked device>"); // SECRET_HASH (if required)
 //!
 //! // Part 2: Generate the challenge response parameters for the `DEVICE_PASSWORD_VERIFIER` challenge
 //! // issued by AWS Cognito in response to the `RespondToAuthChallenge` request.
 //! let VerificationParameters {
 //!     password_claim_secret_block, // PASSWORD_CLAIM_SECRET_BLOCK
 //!     password_claim_signature, // PASSWORD_CLAIM_SIGNATURE
-//!     secret_hash, // SECRET_HASH (if required)
 //!     timestamp // TIMESTAMP
 //! } = client.verify(
 //!     "SECRET_BLOCK_FROM_INITIATE_AUTH_RESPONSE",
-//!     "USER_ID_FOR_SRP_FROM_INITIATE_AUTH_RESPONSE",
 //!     "SALT_FROM_INITIATE_AUTH_RESPONSE",
 //!     "SRP_B_FROM_INITIATE_AUTH_RESPONSE"
 //! )?;
@@ -186,11 +182,7 @@
 //! // Part 2: Once the `ConfirmDevice` request has succeeded, the untracked device can then be converted
 //! // into a tracked device, which can be used for Device authentication later.
 //! let tracked_device = client.take_credentials()
-//!     .into_tracked(
-//!         // The username of the user which the device is tracked with.
-//!         "<username>",
-//!         &password
-//!     );
+//!     .into_tracked(&password);
 //!
 //! # Ok::<(), SrpError>(())
 //! ```

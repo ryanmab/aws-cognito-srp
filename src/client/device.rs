@@ -30,9 +30,6 @@ pub struct TrackedDevice {
     /// For example: `us-east-1_SqmNeowUdp`.
     pool_id: String,
 
-    /// The username of the **user** who owns the registered device.
-    username: String,
-
     device_group_key: String,
     device_key: String,
     device_password: String,
@@ -77,13 +74,11 @@ impl UntrackedDevice {
 
     /// Convert the untracked device into a tracked device.
     ///
-    /// This requires:
-    /// 1. The **device password** (the random password generated for the device during
-    ///    confirmation)
-    /// 2. The **username** of the user who the device is remembered with.
+    /// This requires **device password** (the random password generated for the device during
+    /// confirmation).
     #[must_use]
-    pub fn into_tracked(self, username: &str, device_password: &str) -> TrackedDevice {
-        TrackedDevice::from_untracked(&self, username, device_password)
+    pub fn into_tracked(self, device_password: &str) -> TrackedDevice {
+        TrackedDevice::from_untracked(&self, device_password)
     }
 }
 
@@ -97,14 +92,12 @@ impl TrackedDevice {
     #[must_use]
     pub fn new(
         pool_id: &str,
-        username: &str,
         device_group_key: &str,
         device_key: &str,
         device_password: &str,
     ) -> Self {
         Self {
             pool_id: pool_id.to_string(),
-            username: username.to_string(),
             device_group_key: device_group_key.to_string(),
             device_key: device_key.to_string(),
             device_password: device_password.to_string(),
@@ -120,12 +113,10 @@ impl TrackedDevice {
     #[must_use]
     pub fn from_untracked(
         untracked: &UntrackedDevice,
-        username: &str,
         device_password: &str,
     ) -> Self {
         Self::new(
             &untracked.pool_id,
-            username,
             &untracked.device_group_key,
             &untracked.device_key,
             device_password,
@@ -140,7 +131,6 @@ impl SrpClient<TrackedDevice> {
     /// initial public parameters which can then be used to validate the user's password.
     pub fn get_auth_parameters(&self) -> AuthParameters {
         let TrackedDevice {
-            username,
             device_key,
             ..
         } = &self.credentials;
@@ -154,8 +144,19 @@ impl SrpClient<TrackedDevice> {
             a: hex::encode(compute_pub_a(&self.a)),
             device_key: Some(device_key.into()),
             username: None,
-            secret_hash: self.get_secret_hash(username, &self.client_id),
         }
+    }
+
+    /// Get the secret hash to be used on login and challenge requests to AWS Cognito.
+    ///
+    /// This is only required if your App client is configured with a client secret (and that is
+    /// provided when creating the SRP client).
+    ///
+    /// The resulting hash should be provided as the `SECRET_HASH` parameter in the `InitiateAuth`
+    /// and `RespondToAuthChallenge` requests to [AWS Cognito](https://docs.aws.amazon.com/cognito/latest/developerguide/signing-up-users-in-your-app.html#cognito-user-pools-computing-secret-hash).
+    #[must_use]
+    pub fn get_secret_hash(&self, user_id: &str) -> Option<String> {
+        self.get_secret_hash_for_user_id(user_id, &self.client_id)
     }
 
     /// Generate the challenge response parameters for the `DEVICE_PASSWORD_VERIFIER` challenge
@@ -170,7 +171,6 @@ impl SrpClient<TrackedDevice> {
     pub fn verify(
         &self,
         secret_block: &str,
-        user_id: &str,
         salt: &str,
         b: &str,
     ) -> Result<VerificationParameters, SrpError> {
@@ -197,13 +197,12 @@ impl SrpClient<TrackedDevice> {
         h256mac.update(&msg);
         let signature = BASE64.encode(h256mac.finalize().into_bytes());
 
-        info!(user_id, device_key = self.credentials.device_key.as_str(); "Generated verification parameters for device.");
+        info!(device_key = self.credentials.device_key.as_str(); "Generated verification parameters for device.");
 
         Ok(VerificationParameters {
             timestamp,
             password_claim_secret_block: secret_block.into(),
             password_claim_signature: signature,
-            secret_hash: self.get_secret_hash(user_id, &self.client_id),
         })
     }
 
@@ -314,8 +313,6 @@ impl SrpClient<UntrackedDevice> {
 
 #[cfg(test)]
 mod tests {
-    use rand::RngCore;
-
     use crate::PasswordVerifierParameters;
 
     use super::{SrpClient, TrackedDevice, UntrackedDevice, VerificationParameters};
@@ -328,14 +325,11 @@ mod tests {
 
     const MOCK_SECRET_BLOCK: &str = "9ae77ec7154c14dcc487b47707fee4b4920cb96d8a8c045e4c8df879a7b375524aa736acdec6c9ad4ea606774d00621b";
 
-    const MOCK_USER_ID: &str = "abc-1234-678";
-
     #[test]
     fn test_auth_parameters_generates_successfully() {
         let client = SrpClient::new(
             TrackedDevice::new(
                 "us-west-2_abc",
-                "username",
                 "mock-device-group-key",
                 "mock-device-key",
                 "password",
@@ -348,7 +342,6 @@ mod tests {
             client.get_auth_parameters(),
             crate::client::AuthParameters {
                 username: None,
-                secret_hash: None,
                 device_key: Some("mock-device-key".to_string()),
                 a: MOCK_A.to_string(),
             }
@@ -360,7 +353,6 @@ mod tests {
         let client = SrpClient::new(
             TrackedDevice::new(
                 "us-west-2_abc",
-                "username",
                 "mock-device-group-key",
                 "mock-device-key",
                 "password",
@@ -370,12 +362,11 @@ mod tests {
         );
 
         assert_eq!(
-            client.verify(MOCK_SECRET_BLOCK, MOCK_USER_ID, MOCK_SALT, MOCK_B),
+            client.verify(MOCK_SECRET_BLOCK, MOCK_SALT, MOCK_B),
             Ok(VerificationParameters {
                 password_claim_secret_block: MOCK_SECRET_BLOCK.into(),
                 password_claim_signature: "O9uSej4H1B4or3Zc7Q4+KxuSvOaEfuq2a7Ye4d16fmo="
                     .to_string(),
-                secret_hash: None,
                 timestamp: "Mon Feb 10 18:30:12 UTC 2025".to_string(),
             })
         );
@@ -404,7 +395,6 @@ mod tests {
         let client = SrpClient::new(
             TrackedDevice::new(
                 "us-west-2_abc",
-                "username",
                 "mock-device-group-key",
                 "mock-device-key",
                 "password",
@@ -416,7 +406,6 @@ mod tests {
         assert_eq!(
             client.verify(
                 MOCK_SECRET_BLOCK,
-                "user_id",
                 // Notice that `b` and `salt` are hex strings which have an odd length!
                 "36ef01c",
                 "36ef01c"
@@ -425,7 +414,6 @@ mod tests {
                 password_claim_secret_block: MOCK_SECRET_BLOCK.into(),
                 password_claim_signature: "eXYI/hzMa/5YWYSk1NFcDMOOBAOg+juflcjl38+xx4I="
                     .to_string(),
-                secret_hash: None,
                 timestamp: "Mon Feb 10 18:30:12 UTC 2025".to_string(),
             })
         );

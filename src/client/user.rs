@@ -55,8 +55,19 @@ impl SrpClient<User> {
             username: Some(username.into()),
             device_key: None,
             a: hex::encode(compute_pub_a(&self.a)),
-            secret_hash: self.get_secret_hash(username, &self.client_id),
         }
+    }
+
+    /// Get the secret hash to be used on login and challenge requests to AWS Cognito.
+    ///
+    /// This is only required if your App client is configured with a client secret (and that is
+    /// provided when creating the SRP client).
+    ///
+    /// The resulting hash should be provided as the `SECRET_HASH` parameter in the `InitiateAuth`
+    /// and `RespondToAuthChallenge` requests to [AWS Cognito](https://docs.aws.amazon.com/cognito/latest/developerguide/signing-up-users-in-your-app.html#cognito-user-pools-computing-secret-hash).
+    #[must_use]
+    pub fn get_secret_hash(&self) -> Option<String> {
+        self.get_secret_hash_for_user_id(&self.credentials.username, &self.client_id)
     }
 
     /// Generate the challenge response parameters for the `PASSWORD_VERIFIER` challenge issued by
@@ -109,7 +120,6 @@ impl SrpClient<User> {
             timestamp,
             password_claim_secret_block: secret_block.into(),
             password_claim_signature: signature,
-            secret_hash: self.get_secret_hash(user_id, &self.client_id),
         })
     }
 
@@ -171,8 +181,6 @@ impl SrpClient<User> {
 
 #[cfg(test)]
 mod tests {
-    use rand::RngCore;
-
     use super::{SrpClient, User, VerificationParameters};
 
     const MOCK_A: &str = "b1ce118779e27c1c015d7a226ecae2ea1fcd017049e4f5c6f9908c686d496dce12a1c017a7523d43e2f3a6bb7e75e266bab0471e0720030edb64d8b5aef428356bc72198d41d319cf36eb0c4b4063fb99f90bc3b25b0d1196f84836bc05be0dfe1e6d1e21ba4c77098f6e6119127981395b0f4da67e26f63ecbfb2ded5d9c091c9850c08f0c372e5101df27967250254d6748a75c9be2f59324d31241f950d79224af0d5ff1c169af541b04a063bd0d4f79216a9da1e1874bc041b97ca2d456310f0b29f3644eca4d0e0c21660cbc5774a7319746bf53024a3bbb9c1251002854d1e6fac951d3a160771cdaf681a95e8cd51eb0630c825cd6227f22edefd35b3789df41dfca6cbd4d90e90ec7e38d3cbdf2b5f3534b016267f6a42190690d4225131811c6ea3b8265cff2fc44497887995eb95357747c3db40dab7199af3b9cbaba28a75d800d809421c5da1b0a24ec3120b3738750dcd42a61d1e9d272118ec2e6db632c241ab33558502dc9bbac1f4a34b3243082b89dcc0620a626d83a483";
@@ -195,7 +203,6 @@ mod tests {
             client.get_auth_parameters(),
             crate::client::AuthParameters {
                 username: Some("test".to_string()),
-                secret_hash: None,
                 device_key: None,
                 a: MOCK_A.to_string(),
             }
@@ -216,7 +223,6 @@ mod tests {
                 password_claim_secret_block: MOCK_SECRET_BLOCK.into(),
                 password_claim_signature: "apNSb5GZpJciVc6cVNkDf4elCMoWUZcH4aukLlMPiFA="
                     .to_string(),
-                secret_hash: None,
                 timestamp: "Mon Feb 10 18:30:12 UTC 2025".to_string(),
             })
         );
@@ -242,7 +248,6 @@ mod tests {
                 password_claim_secret_block: MOCK_SECRET_BLOCK.into(),
                 password_claim_signature: "bVzjSe43mY37A6ZuzEVU5cr6QY1WeV3BPfdVJo0c2/8="
                     .to_string(),
-                secret_hash: None,
                 timestamp: "Mon Feb 10 18:30:12 UTC 2025".to_string(),
             })
         );
