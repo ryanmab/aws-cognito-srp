@@ -16,6 +16,7 @@ async fn test_device_sign_in_works() {
         &cognito,
         &user_srp,
         user_srp.get_auth_parameters(),
+        Some(&device_key),
     )
     .await;
 
@@ -49,7 +50,7 @@ async fn test_device_sign_in_works() {
         user_id,
         parameters,
         auth_session.clone(),
-        Some(device_key.clone()),
+        Some(&device_key),
     )
     .await;
 
@@ -69,7 +70,6 @@ async fn test_device_sign_in_works() {
         &device_srp,
         device_srp.get_auth_parameters(),
         user_id,
-        &device_key,
         auth_session,
     )
     .await;

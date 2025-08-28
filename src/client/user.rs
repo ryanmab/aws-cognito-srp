@@ -7,7 +7,7 @@ use crate::client::helper::{
     compute_k, compute_pub_a, compute_pub_b, compute_s, compute_u, compute_x,
     generate_key_derive_data, get_timestamp, left_pad, left_pad_to_even_length,
 };
-use crate::client::{private, AuthParameters, HmacSha256, VerificationParameters};
+use crate::client::{private, HmacSha256, VerificationParameters};
 use crate::{Credentials, SrpClient, SrpError};
 
 /// A **user** stored in the AWS Cognito user pool.
@@ -41,19 +41,33 @@ impl User {
     }
 }
 
+/// The parameters required to initiate an authentication flow with AWS Cognito, when using the
+/// `USER_SRP_AUTH` flow type.
+///
+/// For the full request structure see documentation: [InitiateAuth](https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_InitiateAuth.html)
+#[derive(Debug, Eq, PartialEq)]
+#[must_use]
+pub struct UserAuthenticationParameters {
+    /// The **public** `A` for the client.
+    pub a: String,
+
+    /// The username of the user - this is the one provided during
+    /// instantiation of the SRP client.
+    pub username: String,
+}
+
 impl SrpClient<User> {
     /// Generate the authentication parameters for the initial `InitiateAuth` request.
     ///
     /// This begins the SRP authentication flow with AWS Cognito, and exchanges the various
     /// initial public parameters which can then be used to validate the user's password.
-    pub fn get_auth_parameters(&self) -> AuthParameters {
+    pub fn get_auth_parameters(&self) -> UserAuthenticationParameters {
         let User { username, .. } = &self.credentials;
 
         info!(username = username.as_str(); "Generating auth parameters for user");
 
-        AuthParameters {
-            username: Some(username.into()),
-            device_key: None,
+        UserAuthenticationParameters {
+            username: username.into(),
             a: hex::encode(compute_pub_a(&self.a)),
         }
     }
@@ -201,9 +215,8 @@ mod tests {
 
         assert_eq!(
             client.get_auth_parameters(),
-            crate::client::AuthParameters {
-                username: Some("test".to_string()),
-                device_key: None,
+            crate::client::user::UserAuthenticationParameters {
+                username: "test".to_string(),
                 a: MOCK_A.to_string(),
             }
         );

@@ -11,7 +11,8 @@ pub async fn authenticate_as_user(
     srp: &aws_cognito_srp::SrpClient<User>,
 ) -> Option<AuthenticationResultType> {
     let response =
-        common::request::send_initiate_auth_request(cognito, &srp, srp.get_auth_parameters()).await;
+        common::request::send_initiate_auth_request(cognito, &srp, srp.get_auth_parameters(), None)
+            .await;
 
     assert_eq!(
         response.challenge_name,

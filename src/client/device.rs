@@ -10,9 +10,7 @@ use crate::client::helper::{
     left_pad_to_even_length,
 };
 use crate::client::private;
-use crate::client::{
-    AuthParameters, HmacSha256, PasswordVerifierParameters, VerificationParameters,
-};
+use crate::client::{HmacSha256, PasswordVerifierParameters, VerificationParameters};
 use crate::constant::{G, N};
 use crate::{Credentials, SrpClient, SrpError};
 
@@ -121,12 +119,28 @@ impl TrackedDevice {
     }
 }
 
+/// The parameters required to respond to the `DEVICE_SRP_AUTH` challenge for AWS Cognito, when using the
+/// `USER_SRP_AUTH` flow type.
+///
+/// For the full request structure see documentation: [InitiateAuth](https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_InitiateAuth.html)
+#[derive(Debug, Eq, PartialEq)]
+#[must_use]
+pub struct DeviceAuthenticationParameters {
+    /// The **public** `A` for the client.
+    pub a: String,
+
+    /// The device key of the tracked device - this is the one provided during
+    /// instantiation of the SRP client.
+    pub device_key: String,
+}
+
 impl SrpClient<TrackedDevice> {
-    /// Generate the authentication parameters for the initial `InitiateAuth` request.
+    /// Generate the challenge response parameters for the `DEVICE_SRP_AUTH` challenge
+    /// issued by AWS Cognito in response to the `RespondToAuthChallenge` request.
     ///
-    /// This begins the SRP authentication flow with AWS Cognito, and exchanges the various
-    /// initial public parameters which can then be used to validate the user's password.
-    pub fn get_auth_parameters(&self) -> AuthParameters {
+    /// This begins the SRP authentication with AWS Cognito for the Device, and exchanges the various
+    /// initial public parameters which can then be used to validate the device as trusted.
+    pub fn get_auth_parameters(&self) -> DeviceAuthenticationParameters {
         let TrackedDevice { device_key, .. } = &self.credentials;
 
         info!(
@@ -134,10 +148,9 @@ impl SrpClient<TrackedDevice> {
             "Generating auth parameters for device"
         );
 
-        AuthParameters {
+        DeviceAuthenticationParameters {
             a: hex::encode(compute_pub_a(&self.a)),
-            device_key: Some(device_key.into()),
-            username: None,
+            device_key: device_key.into(),
         }
     }
 
@@ -334,9 +347,8 @@ mod tests {
 
         assert_eq!(
             client.get_auth_parameters(),
-            crate::client::AuthParameters {
-                username: None,
-                device_key: Some("mock-device-key".to_string()),
+            crate::client::device::DeviceAuthenticationParameters {
+                device_key: "mock-device-key".to_string(),
                 a: MOCK_A.to_string(),
             }
         );

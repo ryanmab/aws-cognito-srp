@@ -8,6 +8,9 @@ pub use device::TrackedDevice;
 pub use device::UntrackedDevice;
 pub use user::User;
 
+pub use device::DeviceAuthenticationParameters;
+pub use user::UserAuthenticationParameters;
+
 mod device;
 mod helper;
 mod user;
@@ -26,28 +29,6 @@ mod private {
 /// 2. [`TrackedDevice`] - For authenticating via SRP with a remembered device.
 /// 3. [`UntrackedDevice`] - For generating a password verifier for a new device during confirmation.
 pub trait Credentials: private::Sealed + Send + Sync {}
-
-/// The parameters required to initiate an authentication flow with AWS Cognito, when using the
-/// `USER_SRP_AUTH` flow type.
-///
-/// For the full request structure see documentation: [InitiateAuth](https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_InitiateAuth.html)
-#[derive(Debug, Eq, PartialEq)]
-#[must_use]
-pub struct AuthParameters {
-    /// The **public** `A` for the client.
-    pub a: String,
-
-    /// The username of the user - this is the one provided during
-    /// instantiation of the SRP client.
-    ///
-    /// This will only be returned when using [User] credentials.
-    pub username: Option<String>,
-
-    /// The device key of the tracked device.
-    ///
-    /// This will only be returned when using [`TrackedDevice`] credentials.
-    pub device_key: Option<String>,
-}
 
 /// The parameters required to respond to the `PASSWORD_VERIFIER` (if authenticating as a User) and `DEVICE_PASSWORD_VERIFIER`
 /// (if authenticating using a Device) challenges.
