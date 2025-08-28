@@ -16,7 +16,7 @@ async fn test_device_sign_in_works() {
         &cognito,
         &user_srp,
         user_srp.get_auth_parameters(),
-        Some(&device_key)
+        Some(&device_key),
     )
     .await;
 

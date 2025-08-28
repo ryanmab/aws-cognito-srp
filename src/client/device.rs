@@ -10,9 +10,7 @@ use crate::client::helper::{
     left_pad_to_even_length,
 };
 use crate::client::private;
-use crate::client::{
-    HmacSha256, PasswordVerifierParameters, VerificationParameters,
-};
+use crate::client::{HmacSha256, PasswordVerifierParameters, VerificationParameters};
 use crate::constant::{G, N};
 use crate::{Credentials, SrpClient, SrpError};
 

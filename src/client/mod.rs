@@ -12,8 +12,8 @@ pub use device::DeviceAuthenticationParameters;
 pub use user::UserAuthenticationParameters;
 
 mod device;
-mod user;
 mod helper;
+mod user;
 
 type HmacSha256 = Hmac<Sha256>;
 
