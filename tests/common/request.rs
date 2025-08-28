@@ -6,8 +6,8 @@ use aws_sdk_cognitoidentityprovider::types::{AuthFlowType, ChallengeNameType};
 use dotenvy_macro::dotenv;
 
 use aws_cognito_srp::{
-    DeviceAuthenticationParameters, PasswordVerifierParameters, SrpClient,
-    TrackedDevice, User, UserAuthenticationParameters, VerificationParameters,
+    DeviceAuthenticationParameters, PasswordVerifierParameters, SrpClient, TrackedDevice, User,
+    UserAuthenticationParameters, VerificationParameters,
 };
 
 pub async fn send_initiate_auth_request(
