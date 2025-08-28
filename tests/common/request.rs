@@ -5,15 +5,13 @@ use aws_sdk_cognitoidentityprovider::types::builders::DeviceSecretVerifierConfig
 use aws_sdk_cognitoidentityprovider::types::{AuthFlowType, ChallengeNameType};
 use dotenvy_macro::dotenv;
 
-use aws_cognito_srp::{
-    AuthParameters, Credentials, PasswordVerifierParameters, SrpClient, TrackedDevice, User,
-    VerificationParameters,
-};
+use aws_cognito_srp::{UserAuthenticationParameters, Credentials, PasswordVerifierParameters, SrpClient, TrackedDevice, User, VerificationParameters, DeviceAuthenticationParameters};
 
 pub async fn send_initiate_auth_request(
     cognito: &aws_sdk_cognitoidentityprovider::Client,
     srp_client: &SrpClient<User>,
-    parameters: AuthParameters,
+    parameters: UserAuthenticationParameters,
+    device_key: Option<&String>,
 ) -> InitiateAuthOutput {
     let mut builder = cognito
         .initiate_auth()
@@ -26,7 +24,7 @@ pub async fn send_initiate_auth_request(
         builder = builder.auth_parameters("SECRET_HASH", secret_hash);
     }
 
-    if let Some(device_key) = parameters.device_key {
+    if let Some(device_key) = device_key {
         builder = builder.auth_parameters("DEVICE_KEY", device_key);
     }
 
@@ -42,7 +40,7 @@ pub async fn send_password_verifier_auth_challenge_request(
     user_id: &String,
     parameters: VerificationParameters,
     session: Option<String>,
-    device_key: Option<String>,
+    device_key: Option<&String>,
 ) -> RespondToAuthChallengeOutput {
     let mut builder = cognito
         .respond_to_auth_challenge()
@@ -99,7 +97,7 @@ pub async fn send_confirm_device_request(
 pub async fn send_device_srp_auth_challenge_request(
     cognito: &aws_sdk_cognitoidentityprovider::Client,
     srp_client: &SrpClient<TrackedDevice>,
-    parameters: AuthParameters,
+    parameters: DeviceAuthenticationParameters,
     user_id: &String,
     device_key: &String,
     session: Option<String>,
@@ -108,7 +106,7 @@ pub async fn send_device_srp_auth_challenge_request(
         .respond_to_auth_challenge()
         .challenge_responses("SRP_A", parameters.a)
         .challenge_responses("USERNAME", user_id)
-        .challenge_responses("DEVICE_KEY", device_key)
+        .challenge_responses("DEVICE_KEY", parameters.device_key)
         .set_session(session)
         .client_id(dotenv!("CLIENT_ID"))
         .challenge_name(ChallengeNameType::DeviceSrpAuth);

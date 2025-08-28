@@ -31,7 +31,7 @@
 //! issued.
 //!
 //! ```no_run
-//! use aws_cognito_srp::{AuthParameters, SrpClient, SrpError, User, VerificationParameters};
+//! use aws_cognito_srp::{UserAuthenticationParameters, SrpClient, SrpError, User, VerificationParameters};
 //!
 //! let client_id = "";
 //!
@@ -55,10 +55,9 @@
 //! let client = SrpClient::new(user, client_id, client_secret);
 //!
 //! // Part 1: Generate the auth parameters for the initial `InitiateAuth` request
-//! let AuthParameters {
+//! let UserAuthenticationParameters {
 //!     a, // SRP_A
 //!     username, // USERNAME
-//!     device_key // DEVICE_KEY
 //! } = client.get_auth_parameters();
 //!
 //! let secret_hash = client.get_secret_hash(); // SECRET_HASH (if required)
@@ -90,7 +89,7 @@
 //! `DEVICE_PASSWORD_VERIFIER` challenges are issued.
 //!
 //! ```no_run
-//! use aws_cognito_srp::{AuthParameters, TrackedDevice, SrpClient, SrpError, User, VerificationParameters};
+//! use aws_cognito_srp::{DeviceAuthenticationParameters, TrackedDevice, SrpClient, SrpError, User, VerificationParameters};
 //!
 //! let client_id = "";
 //!
@@ -116,9 +115,8 @@
 //!
 //! // Part 1: Generate the challenge response parameters for the `RespondToAuthChallenge` request
 //! // when responding to the `DeviceSrpAuth` challenge issued by AWS Cognito.
-//! let AuthParameters {
+//! let DeviceAuthenticationParameters {
 //!     a, // SRP_A
-//!     username, // USERNAME
 //!     device_key // DEVICE_KEY
 //! } = client.get_auth_parameters();
 //!
@@ -232,7 +230,7 @@
 #[macro_use]
 extern crate lazy_static;
 
-pub use crate::client::{AuthParameters, PasswordVerifierParameters, VerificationParameters};
+pub use crate::client::{PasswordVerifierParameters, VerificationParameters, DeviceAuthenticationParameters, UserAuthenticationParameters};
 pub use crate::client::{Credentials, SrpClient, TrackedDevice, UntrackedDevice, User};
 pub use crate::error::SrpError;
 
