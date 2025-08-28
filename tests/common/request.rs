@@ -6,7 +6,7 @@ use aws_sdk_cognitoidentityprovider::types::{AuthFlowType, ChallengeNameType};
 use dotenvy_macro::dotenv;
 
 use aws_cognito_srp::{
-    Credentials, DeviceAuthenticationParameters, PasswordVerifierParameters, SrpClient,
+    DeviceAuthenticationParameters, PasswordVerifierParameters, SrpClient,
     TrackedDevice, User, UserAuthenticationParameters, VerificationParameters,
 };
 
@@ -102,7 +102,6 @@ pub async fn send_device_srp_auth_challenge_request(
     srp_client: &SrpClient<TrackedDevice>,
     parameters: DeviceAuthenticationParameters,
     user_id: &String,
-    device_key: &String,
     session: Option<String>,
 ) -> RespondToAuthChallengeOutput {
     let mut builder = cognito
