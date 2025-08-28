@@ -5,10 +5,14 @@ use aws_sdk_cognitoidentityprovider::types::builders::DeviceSecretVerifierConfig
 use aws_sdk_cognitoidentityprovider::types::{AuthFlowType, ChallengeNameType};
 use dotenvy_macro::dotenv;
 
-use aws_cognito_srp::{AuthParameters, PasswordVerifierParameters, VerificationParameters};
+use aws_cognito_srp::{
+    AuthParameters, Credentials, PasswordVerifierParameters, SrpClient, TrackedDevice, User,
+    VerificationParameters,
+};
 
 pub async fn send_initiate_auth_request(
     cognito: &aws_sdk_cognitoidentityprovider::Client,
+    srp_client: &SrpClient<User>,
     parameters: AuthParameters,
 ) -> InitiateAuthOutput {
     let mut builder = cognito
@@ -18,7 +22,7 @@ pub async fn send_initiate_auth_request(
         .auth_parameters("SRP_A", parameters.a)
         .auth_parameters("USERNAME", dotenv!("USER_EMAIL"));
 
-    if let Some(secret_hash) = parameters.secret_hash {
+    if let Some(secret_hash) = srp_client.get_secret_hash() {
         builder = builder.auth_parameters("SECRET_HASH", secret_hash);
     }
 
@@ -34,6 +38,7 @@ pub async fn send_initiate_auth_request(
 
 pub async fn send_password_verifier_auth_challenge_request(
     cognito: &aws_sdk_cognitoidentityprovider::Client,
+    srp_client: &SrpClient<User>,
     user_id: &String,
     parameters: VerificationParameters,
     session: Option<String>,
@@ -53,13 +58,11 @@ pub async fn send_password_verifier_auth_challenge_request(
             "PASSWORD_CLAIM_SIGNATURE",
             parameters.password_claim_signature,
         )
-        .challenge_responses(
-            "SECRET_HASH",
-            parameters
-                .secret_hash
-                .expect("Secret has should be present as a client secret was provided"),
-        )
         .challenge_responses("TIMESTAMP", &parameters.timestamp);
+
+    if let Some(secret_hash) = srp_client.get_secret_hash() {
+        builder = builder.challenge_responses("SECRET_HASH", secret_hash);
+    }
 
     if let Some(device_key) = device_key {
         builder = builder.challenge_responses("DEVICE_KEY", device_key);
@@ -95,6 +98,7 @@ pub async fn send_confirm_device_request(
 
 pub async fn send_device_srp_auth_challenge_request(
     cognito: &aws_sdk_cognitoidentityprovider::Client,
+    srp_client: &SrpClient<TrackedDevice>,
     parameters: AuthParameters,
     user_id: &String,
     device_key: &String,
@@ -109,7 +113,7 @@ pub async fn send_device_srp_auth_challenge_request(
         .client_id(dotenv!("CLIENT_ID"))
         .challenge_name(ChallengeNameType::DeviceSrpAuth);
 
-    if let Some(secret_hash) = parameters.secret_hash {
+    if let Some(secret_hash) = srp_client.get_secret_hash(user_id) {
         builder = builder.challenge_responses("SECRET_HASH", secret_hash);
     }
 
@@ -121,6 +125,7 @@ pub async fn send_device_srp_auth_challenge_request(
 
 pub async fn send_device_password_verifier_auth_challenge_request(
     cognito: &aws_sdk_cognitoidentityprovider::Client,
+    srp_client: &SrpClient<TrackedDevice>,
     user_id: &String,
     parameters: VerificationParameters,
     session: Option<String>,
@@ -140,13 +145,11 @@ pub async fn send_device_password_verifier_auth_challenge_request(
             "PASSWORD_CLAIM_SIGNATURE",
             parameters.password_claim_signature,
         )
-        .challenge_responses(
-            "SECRET_HASH",
-            parameters
-                .secret_hash
-                .expect("Secret has should be present as a client secret was provided"),
-        )
         .challenge_responses("TIMESTAMP", &parameters.timestamp);
+
+    if let Some(secret_hash) = srp_client.get_secret_hash(user_id) {
+        builder = builder.challenge_responses("SECRET_HASH", secret_hash);
+    }
 
     if let Some(device_key) = device_key {
         builder = builder.challenge_responses("DEVICE_KEY", device_key);

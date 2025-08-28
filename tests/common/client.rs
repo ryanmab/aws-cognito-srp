@@ -24,7 +24,6 @@ pub fn get_tracked_device_srp_client(
     common::get_srp_client(
         TrackedDevice::new(
             dotenv!("POOL_ID"),
-            dotenv!("USER_EMAIL"),
             &device_group_key,
             &device_key,
             &device_password,

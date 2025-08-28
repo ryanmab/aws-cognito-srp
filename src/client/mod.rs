@@ -25,7 +25,7 @@ mod private {
 /// 1. [`User`] - For authenticating via SRP with a user.
 /// 2. [`TrackedDevice`] - For authenticating via SRP with a remembered device.
 /// 3. [`UntrackedDevice`] - For generating a password verifier for a new device during confirmation.
-pub trait Credentials: private::Sealed {}
+pub trait Credentials: private::Sealed + Send + Sync {}
 
 /// The parameters required to initiate an authentication flow with AWS Cognito, when using the
 /// `USER_SRP_AUTH` flow type.
@@ -42,10 +42,6 @@ pub struct AuthParameters {
     ///
     /// This will only be returned when using [User] credentials.
     pub username: Option<String>,
-
-    /// The hash of the client secret provided during instantiation of the SRP client (if
-    /// one was provided).
-    pub secret_hash: Option<String>,
 
     /// The device key of the tracked device.
     ///
@@ -65,13 +61,6 @@ pub struct VerificationParameters {
 
     /// The signature of the password claim generated during verification.
     pub password_claim_signature: String,
-
-    /// The hash of the client secret provided during instantiation
-    /// of the SRP client (if one was provided).
-    ///
-    /// As the hash is computed using the username, this will only be returned when
-    /// using [User] credentials.
-    pub secret_hash: Option<String>,
 
     /// The timestamp of the verification.
     pub timestamp: String,
@@ -175,7 +164,6 @@ impl<C: Credentials> SrpClient<C> {
     /// let client = client.into(
     ///     TrackedDevice::new(
     ///         "mock-pool-id",
-    ///         "mock-username",
     ///         "mock-device-group-key",
     ///         "mock-device-key",
     ///         &password
@@ -213,11 +201,19 @@ impl<C: Credentials> SrpClient<C> {
 
     /// Get the secret hash to be used on login and challenge requests to AWS Cognito.
     ///
-    /// Calculation is: `BASE64(HMAC_SHA256(<client secret>, <username> + <client id>))`
-    fn get_secret_hash(&self, username: &str, client_id: &str) -> Option<String> {
+    /// The User ID is typically the username (and likely the email address) of the user, but
+    /// can depend on the configuration of the AWS Cognito User Pool, and whether the secret is being
+    /// used for the `InitiateAuth` or `RespondToAuthChallenge` request.
+    ///
+    /// Calculation is: `BASE64(HMAC_SHA256(<client secret>, <user id> + <client id>))`
+    pub(crate) fn get_secret_hash_for_user_id(
+        &self,
+        user_id: &str,
+        client_id: &str,
+    ) -> Option<String> {
         self.client_secret.as_ref().and_then(|secret| {
             let mut hmac = HmacSha256::new_from_slice(secret.as_bytes()).ok()?;
-            hmac.update(username.as_bytes());
+            hmac.update(user_id.as_bytes());
             hmac.update(client_id.as_bytes());
 
             let hash = BASE64.encode(hmac.finalize().into_bytes());
@@ -261,8 +257,7 @@ mod tests {
 
         // Convert the untracked device into a tracked device (as we have now confirmed the device now),
         // and create a new client with the tracked device credentials
-        let tracked_device =
-            taken_credentials.into_tracked("mock-username", &password_verifier.password);
+        let tracked_device = taken_credentials.into_tracked(&password_verifier.password);
         let _ = SrpClient::new(tracked_device, "some-client-id", Some("some-client-secret"));
     }
 }
