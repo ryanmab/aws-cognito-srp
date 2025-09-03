@@ -1,9 +1,9 @@
 on:
   pull_request:
   push:
-    branches: [ main ]
+    branches: [main]
   schedule:
-    - cron:  '7 7 * * *'
+    - cron: "7 7 * * *"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -111,7 +111,7 @@ jobs:
         run: cargo test --locked --all-features --doc
 
       - uses: ryanmab/incident-io-alert@v0.1.0
-        if: failure()
+        if: failure() && github.event_name == 'schedule'
         with:
           alert_source_id: ${{ secrets.ALERT_SOURCE_ID }}
           alert_source_token: ${{ secrets.ALERT_SOURCE_TOKEN }}
@@ -120,7 +120,7 @@ jobs:
           description: |
             The nightly build for the AWS Cognito SRP repository has failed.
 
-            This would indicate that there is an upcoming set of breaking changes to Rust, or 
+            This would indicate that there is an upcoming set of breaking changes to Rust, or
             other dependencies, which will require an update to the AWS Cognito SRP library.
 
   update:
@@ -172,7 +172,7 @@ jobs:
           RUSTFLAGS: -D deprecated
 
       - uses: ryanmab/incident-io-alert@v0.1.0
-        if: failure()
+        if: failure() && github.event_name == 'schedule'
         with:
           alert_source_id: ${{ secrets.ALERT_SOURCE_ID }}
           alert_source_token: ${{ secrets.ALERT_SOURCE_TOKEN }}
@@ -180,14 +180,14 @@ jobs:
           status: firing
           description: |
             The nightly build for the AWS Cognito SRP repository has failed.
-            
-            This would indicate that there is an upcoming set of breaking changes to Rust, or 
+
+            This would indicate that there is an upcoming set of breaking changes to Rust, or
             other dependencies, which will require an update to the AWS Cognito SRP library.
 
   teardown:
     name: Teardown Environment
     runs-on: ubuntu-latest
-    needs: [ setup, nightly, update ]
+    needs: [setup, nightly, update]
     if: always() && needs.setup.result != 'skipped'
     steps:
       - uses: actions/checkout@v5
