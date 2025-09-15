@@ -104,8 +104,8 @@ impl TrackedDevice {
 
     /// Convert the untracked device into a tracked device.
     ///
-    /// This requires the **device password**, which should be the
-    /// random password generated for the device during confirmation
+    /// This requires the **device password**, which should be the random password generated for
+    /// the device during confirmation flow.
     #[must_use]
     pub fn from_untracked(untracked: &UntrackedDevice, device_password: &str) -> Self {
         Self::new(
