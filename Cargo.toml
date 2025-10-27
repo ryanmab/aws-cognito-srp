@@ -30,6 +30,12 @@ thiserror = "2.0.11"
 log = { version = "0.4.27", features = ["kv"] }
 chrono = "0.4.26"
 
+# Pinning to solve a deprecation warning until a new veersion of the digest crate is
+# released at the end of the year
+#
+# See: https://github.com/RustCrypto/traits/issues/2036#issuecomment-3448970640
+generic-array = "0.14.7"
+
 [dev-dependencies]
 aws-config = "1.5.13"
 aws-sdk-cognitoidentityprovider = "1.62.0"

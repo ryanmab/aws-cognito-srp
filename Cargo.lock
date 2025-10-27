@@ -64,6 +64,7 @@ dependencies = [
  "digest",
  "dotenvy",
  "dotenvy_macro",
+ "generic-array",
  "hex",
  "hmac",
  "lazy_static",
