@@ -27,7 +27,7 @@ jobs:
       test_user_pool_client_id: ${{ steps.outputs.outputs.user_pool_client_id }}
       test_user_pool_client_secret: ${{ steps.outputs.outputs.user_pool_client_secret }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - uses: aws-actions/configure-aws-credentials@v5
         with:
@@ -74,7 +74,7 @@ jobs:
     name: Test (nightly)
     needs: [setup]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - uses: aws-actions/configure-aws-credentials@v5
         with:
@@ -128,7 +128,7 @@ jobs:
     name: Test (beta / updated)
     needs: [setup]
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - uses: aws-actions/configure-aws-credentials@v5
         with:
@@ -190,7 +190,7 @@ jobs:
     needs: [setup, nightly, update]
     if: always() && needs.setup.result != 'skipped'
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - uses: aws-actions/configure-aws-credentials@v5
         with:
