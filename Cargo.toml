@@ -1,6 +1,6 @@
 [package]
 name = "aws-cognito-srp"
-version = "0.2.2"
+version = "0.2.3"
 authors = ["Ryan Maber <ryan@ryanmaber.com>"]
 license = "MIT"
 description = "A Rust implementation of the Secure Remote Password (SRP) protocol for AWS Cognito."
