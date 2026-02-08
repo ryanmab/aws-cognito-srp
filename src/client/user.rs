@@ -1,4 +1,4 @@
-use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
+use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
 use digest::{Digest, Mac, Output};
 use log::info;
 use sha2::Sha256;
@@ -7,7 +7,7 @@ use crate::client::helper::{
     compute_k, compute_pub_a, compute_pub_b, compute_s, compute_u, compute_x,
     generate_key_derive_data, get_timestamp, left_pad, left_pad_to_even_length,
 };
-use crate::client::{private, HmacSha256, VerificationParameters};
+use crate::client::{HmacSha256, VerificationParameters, private};
 use crate::{Credentials, SrpClient, SrpError};
 
 /// A **user** stored in the AWS Cognito user pool.

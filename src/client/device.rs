@@ -1,4 +1,4 @@
-use base64::{engine::general_purpose::STANDARD as BASE64, Engine as _};
+use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
 use digest::{Digest, Mac, Output};
 use log::info;
 use num_bigint::BigUint;

@@ -6,8 +6,8 @@ license = "MIT"
 description = "A Rust implementation of the Secure Remote Password (SRP) protocol for AWS Cognito."
 keywords = ["aws", "cognito", "srp", "authentication", "device"]
 categories = ["cryptography", "authentication"]
-edition = "2021"
-rust-version = "1.65.0"
+edition = "2024"
+rust-version = "1.85.0"
 readme = "README.md"
 
 homepage = "https://ryanmaber.com"
