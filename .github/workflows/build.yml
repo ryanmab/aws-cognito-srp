@@ -125,7 +125,7 @@ jobs:
           aws-region: ${{ env.region }}
           role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
 
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v4
 
       - name: Initialise Terraform
         working-directory: ./infrastructure/tests
@@ -326,7 +326,7 @@ jobs:
           aws-region: ${{ env.region }}
           role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
 
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v4
 
       - name: Initialise Terraform
         working-directory: ./infrastructure/tests
