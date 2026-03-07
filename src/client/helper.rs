@@ -4,7 +4,9 @@ use chrono::Utc;
 use digest::Digest;
 use num_bigint::{BigInt, BigUint, Sign};
 #[cfg(not(test))]
-use rand::{Rng, RngCore};
+use rand::Rng;
+#[cfg(not(test))]
+use rand::RngExt;
 #[cfg(not(test))]
 use regex::Regex;
 
