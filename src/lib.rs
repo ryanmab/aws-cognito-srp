@@ -18,7 +18,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! aws-cognito-srp = "0.2.3"
+//! aws-cognito-srp = "0.2.4"
 //! ```
 //!
 //! ### User authentication
