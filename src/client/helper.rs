@@ -136,7 +136,7 @@ pub fn get_timestamp() -> String {
         )
         .to_string();
 
-    log::info!("Generated timestamp for SRP calculations: {}", timestamp);
+    log::info!("Generated timestamp for SRP calculations: {timestamp}");
 
     timestamp
 }

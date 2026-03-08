@@ -227,9 +227,6 @@
 //! cd infrastructure/tests && terraform destroy
 //! ```
 
-#[macro_use]
-extern crate lazy_static;
-
 pub use crate::client::{Credentials, SrpClient, TrackedDevice, UntrackedDevice, User};
 pub use crate::client::{
     DeviceAuthenticationParameters, PasswordVerifierParameters, UserAuthenticationParameters,

@@ -118,7 +118,7 @@ impl<C: Credentials> SrpClient<C> {
     ///
     /// # assert!(matches!(untracked_device, UntrackedDevice { .. }));
     /// ```
-    pub fn replace_credentials(&mut self, credentials: C) -> C {
+    pub const fn replace_credentials(&mut self, credentials: C) -> C {
         mem::replace(&mut self.credentials, credentials)
     }
 
