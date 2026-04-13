@@ -22,7 +22,7 @@ digest = "0.10.7"
 hex = "0.4.3"
 hmac = "0.12.1"
 num-bigint = { version = "0.4.6", features = ["rand"] }
-rand = "0.10.0"
+rand = "0.10.1"
 regex = "1.12.3"
 sha2 = "0.10.9"
 thiserror = "2.0.18"
