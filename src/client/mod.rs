@@ -1,4 +1,5 @@
 use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
+use hmac::KeyInit;
 use hmac::{Hmac, Mac};
 use log::info;
 use sha2::Sha256;
