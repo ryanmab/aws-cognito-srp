@@ -1,5 +1,6 @@
 use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
 use digest::{Digest, Mac, Output};
+use hmac::KeyInit;
 use log::info;
 use num_bigint::BigUint;
 use sha2::Sha256;
