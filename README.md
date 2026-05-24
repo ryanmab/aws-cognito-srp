@@ -18,7 +18,7 @@ well as the `ConfirmDevice` flow.
 
 ```toml
 [dependencies]
-aws-cognito-srp = "0.2.4"
+aws-cognito-srp = "0.2.5"
 ```
 
 ### User authentication
