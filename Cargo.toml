@@ -30,7 +30,7 @@ log = { version = "0.4.29", features = ["kv"] }
 chrono = "0.4.44"
 
 [dev-dependencies]
-aws-config = "1.8.17"
+aws-config = "1.8.18"
 aws-sdk-cognitoidentityprovider = "1.117.0"
 dotenvy = "0.15.6"
 dotenvy_macro = "0.15.1"
