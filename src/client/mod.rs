@@ -1,12 +1,11 @@
-use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
-use hmac::KeyInit;
-use hmac::{Hmac, Mac};
+use base64::Engine as _;
+use base64::engine::general_purpose::STANDARD as BASE64;
+use hmac::{Hmac, KeyInit, Mac};
 use log::info;
 use sha2::Sha256;
 use std::mem;
 
-pub use device::TrackedDevice;
-pub use device::UntrackedDevice;
+pub use device::{TrackedDevice, UntrackedDevice};
 pub use user::User;
 
 pub use device::DeviceAuthenticationParameters;

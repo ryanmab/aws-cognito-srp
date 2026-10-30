@@ -1,4 +1,5 @@
-use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
+use base64::Engine as _;
+use base64::engine::general_purpose::STANDARD as BASE64;
 use digest::{Digest, Mac, Output};
 use hmac::KeyInit;
 use log::info;
@@ -10,8 +11,7 @@ use crate::client::helper::{
     generate_key_derive_data, generate_password, generate_salt, get_timestamp, left_pad,
     left_pad_to_even_length,
 };
-use crate::client::private;
-use crate::client::{HmacSha256, PasswordVerifierParameters, VerificationParameters};
+use crate::client::{HmacSha256, PasswordVerifierParameters, VerificationParameters, private};
 use crate::constant::{G, N};
 use crate::{Credentials, SrpClient, SrpError};
 
