@@ -82,10 +82,10 @@ dependencies = [
  "aws-sdk-sts",
  "aws-smithy-async",
  "aws-smithy-http",
- "aws-smithy-json 0.65.0",
+ "aws-smithy-json",
  "aws-smithy-runtime",
  "aws-smithy-runtime-api",
- "aws-smithy-schema 1.1.0",
+ "aws-smithy-schema",
  "aws-smithy-types",
  "aws-types",
  "bytes",
@@ -162,25 +162,24 @@ dependencies = [
 
 [[package]]
 name = "aws-sdk-cognitoidentityprovider"
-version = "1.133.0"
+version = "1.142.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e7bfd203b57369a4d1187b22ec19f207f061ce20b5fb7d654497bd5b750e8932"
+checksum = "a02bd7ce2881da802384726d08664b99ddea90e182a5546a0e2ec5e81ac318e0"
 dependencies = [
  "arc-swap",
  "aws-credential-types",
  "aws-runtime",
  "aws-smithy-async",
  "aws-smithy-http",
- "aws-smithy-json 0.63.0",
+ "aws-smithy-json",
  "aws-smithy-observability",
  "aws-smithy-runtime",
  "aws-smithy-runtime-api",
- "aws-smithy-schema 0.2.0",
+ "aws-smithy-schema",
  "aws-smithy-types",
  "aws-types",
  "bytes",
  "fastrand",
- "http 0.2.12",
  "http 1.4.0",
  "regex-lite",
  "tracing",
@@ -197,11 +196,11 @@ dependencies = [
  "aws-runtime",
  "aws-smithy-async",
  "aws-smithy-http",
- "aws-smithy-json 0.65.0",
+ "aws-smithy-json",
  "aws-smithy-observability",
  "aws-smithy-runtime",
  "aws-smithy-runtime-api",
- "aws-smithy-schema 1.1.0",
+ "aws-smithy-schema",
  "aws-smithy-types",
  "aws-types",
  "bytes",
@@ -222,11 +221,11 @@ dependencies = [
  "aws-runtime",
  "aws-smithy-async",
  "aws-smithy-http",
- "aws-smithy-json 0.65.0",
+ "aws-smithy-json",
  "aws-smithy-observability",
  "aws-smithy-runtime",
  "aws-smithy-runtime-api",
- "aws-smithy-schema 1.1.0",
+ "aws-smithy-schema",
  "aws-smithy-types",
  "aws-types",
  "bytes",
@@ -247,12 +246,12 @@ dependencies = [
  "aws-runtime",
  "aws-smithy-async",
  "aws-smithy-http",
- "aws-smithy-json 0.65.0",
+ "aws-smithy-json",
  "aws-smithy-observability",
  "aws-smithy-query",
  "aws-smithy-runtime",
  "aws-smithy-runtime-api",
- "aws-smithy-schema 1.1.0",
+ "aws-smithy-schema",
  "aws-smithy-types",
  "aws-smithy-xml",
  "aws-types",
@@ -346,23 +345,12 @@ dependencies = [
 
 [[package]]
 name = "aws-smithy-json"
-version = "0.63.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3dc65a121adb4b33729919fcfa14fa36fb33c1555a8f06bb0e2188dbfdc1d9ef"
-dependencies = [
- "aws-smithy-runtime-api",
- "aws-smithy-schema 0.2.0",
- "aws-smithy-types",
-]
-
-[[package]]
-name = "aws-smithy-json"
 version = "0.65.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9f6835fb38bc6fc8c91e584b0366eb4ff595e5c485134dbf4f0bdeaa18856666"
 dependencies = [
  "aws-smithy-runtime-api",
- "aws-smithy-schema 1.1.0",
+ "aws-smithy-schema",
  "aws-smithy-types",
 ]
 
@@ -382,7 +370,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "165f6265342a313ad6f7a1ac17a0cdba30c522039d3f41d8d6871ce8a2b34ecd"
 dependencies = [
  "aws-smithy-runtime-api",
- "aws-smithy-schema 1.1.0",
+ "aws-smithy-schema",
  "aws-smithy-types",
  "aws-smithy-xml",
  "urlencoding",
@@ -399,7 +387,7 @@ dependencies = [
  "aws-smithy-http-client",
  "aws-smithy-observability",
  "aws-smithy-runtime-api",
- "aws-smithy-schema 1.1.0",
+ "aws-smithy-schema",
  "aws-smithy-types",
  "bytes",
  "fastrand",
@@ -438,17 +426,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.117",
-]
-
-[[package]]
-name = "aws-smithy-schema"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7d56e0a4e53127a632224e43633b0fe045fa9e1e3cfc68b9830f1115e103f910"
-dependencies = [
- "aws-smithy-runtime-api",
- "aws-smithy-types",
- "http 1.4.0",
 ]
 
 [[package]]
@@ -494,7 +471,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a6581618a2fd006159016d1c36881d94d61b4a017f4a8d631310875e18252413"
 dependencies = [
  "aws-smithy-runtime-api",
- "aws-smithy-schema 1.1.0",
+ "aws-smithy-schema",
  "aws-smithy-types",
  "xmlparser",
 ]
@@ -508,7 +485,7 @@ dependencies = [
  "aws-credential-types",
  "aws-smithy-async",
  "aws-smithy-runtime-api",
- "aws-smithy-schema 1.1.0",
+ "aws-smithy-schema",
  "aws-smithy-types",
  "rustc_version",
  "tracing",
